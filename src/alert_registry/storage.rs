@@ -1,7 +1,11 @@
 //! Storage structures for the AlertRegistry contract
 
-use alloy_primitives::{Address, FixedBytes};
-use stylus_sdk::storage::{StorageAddress, StorageU256, StorageVec};
+extern crate alloc;
+
+#[allow(unused_imports)]
+use alloc::{vec, vec::Vec};
+
+use stylus_sdk::prelude::*;
 use stylus_sdk::stylus_proc::sol_storage;
 
 sol_storage! {
@@ -18,8 +22,8 @@ sol_storage! {
     pub struct Alert {
         /// Timestamp when the alert was created
         uint256 timestamp;
-        /// Severity level (0-255)
-        uint8 severity;
+        /// Severity level (0-255, stored as uint256 due to SDK compat)
+        uint256 severity;
         /// Source address that triggered the alert
         address source;
         /// Hash of the alert message for verification

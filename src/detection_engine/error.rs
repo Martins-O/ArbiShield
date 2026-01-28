@@ -1,7 +1,10 @@
 //! Error types for the DetectionEngine contract
 
+extern crate alloc;
+
+use alloc::vec::Vec;
 use alloy_primitives::{Address, U256};
-use alloy_sol_types::sol;
+use alloy_sol_types::{sol, SolError};
 
 sol! {
     /// Emitted when an unauthorized caller attempts to execute a privileged function
@@ -39,19 +42,19 @@ impl From<Error> for Vec<u8> {
     fn from(err: Error) -> Vec<u8> {
         match err {
             Error::UnauthorizedCaller(caller) => {
-                UnauthorizedCaller { caller }.encode()
+                UnauthorizedCaller { caller }.abi_encode()
             }
             Error::MetricNotFound { id } => {
-                MetricNotFound { id }.encode()
+                MetricNotFound { id }.abi_encode()
             }
             Error::InvalidThreshold { value } => {
-                InvalidThreshold { value }.encode()
+                InvalidThreshold { value }.abi_encode()
             }
             Error::ThresholdExceeded { current, threshold } => {
-                ThresholdExceeded { current, threshold }.encode()
+                ThresholdExceeded { current, threshold }.abi_encode()
             }
             Error::InvalidOwner(owner) => {
-                InvalidOwner { owner }.encode()
+                InvalidOwner { owner }.abi_encode()
             }
         }
     }

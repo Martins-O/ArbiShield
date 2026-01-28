@@ -3,9 +3,11 @@
 //! This contract maintains a permanent record of security alerts,
 //! including their severity, source, and associated metadata.
 
+extern crate alloc;
+
+use alloc::vec::Vec;
 use alloy_primitives::{Address, FixedBytes, U256};
-use stylus_sdk::block;
-use stylus_sdk::msg;
+use stylus_sdk::{block, evm, msg};
 use stylus_sdk::prelude::*;
 
 pub mod error;
@@ -37,7 +39,7 @@ impl IAlertRegistry for AlertRegistry {
         // Create new alert
         let mut new_alert = self.alerts.grow();
         new_alert.timestamp.set(timestamp);
-        new_alert.severity.set(severity);
+        new_alert.severity.set(U256::from(severity));
         new_alert.source.set(source);
         new_alert.message_hash.set(message_hash);
 
@@ -73,7 +75,8 @@ impl IAlertRegistry for AlertRegistry {
         // Get alert from storage
         let alert = self.alerts.get(index).unwrap();
         let timestamp = alert.timestamp.get();
-        let severity = alert.severity.get();
+        let severity_uint: U256 = alert.severity.get();
+        let severity: u8 = severity_uint.saturating_to::<u64>() as u8;
         let source = alert.source.get();
         let message_hash = alert.message_hash.get();
 
@@ -115,10 +118,14 @@ impl IAlertRegistry for AlertRegistry {
 #[public]
 impl AlertRegistry {
     /// Initialize the contract with the deployer as owner
-    pub fn new() -> Self {
-        let mut contract = AlertRegistry::default();
-        contract.owner.set(msg::sender());
-        contract
+    /// Should be called once after deployment
+    pub fn init(&mut self) -> Result<(), Vec<u8>> {
+        // Only allow initialization if owner is not set
+        if self.owner.get() != Address::ZERO {
+            return Err(Error::InvalidOwner(self.owner.get()).into());
+        }
+        self.owner.set(msg::sender());
+        Ok(())
     }
 
     /// Register a new alert
