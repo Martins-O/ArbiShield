@@ -3,8 +3,11 @@
 //! This contract allows registering metrics with thresholds and detecting
 //! when reported values exceed those thresholds, indicating potential anomalies.
 
+extern crate alloc;
+
+use alloc::vec::Vec;
 use alloy_primitives::{Address, U256};
-use stylus_sdk::msg;
+use stylus_sdk::{evm, msg};
 use stylus_sdk::prelude::*;
 
 pub mod error;
@@ -118,10 +121,14 @@ impl IDetectionEngine for DetectionEngine {
 #[public]
 impl DetectionEngine {
     /// Initialize the contract with the deployer as owner
-    pub fn new() -> Self {
-        let mut contract = DetectionEngine::default();
-        contract.owner.set(msg::sender());
-        contract
+    /// Should be called once after deployment
+    pub fn init(&mut self) -> Result<(), Vec<u8>> {
+        // Only allow initialization if owner is not set
+        if self.owner.get() != Address::ZERO {
+            return Err(Error::InvalidOwner(self.owner.get()).into());
+        }
+        self.owner.set(msg::sender());
+        Ok(())
     }
 
     /// Register a new metric with a threshold

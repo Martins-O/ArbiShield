@@ -1,4 +1,5 @@
 #![cfg_attr(not(any(test, feature = "export-abi")), no_main)]
+#![allow(unsafe_code)]
 
 #[cfg(not(any(test, feature = "export-abi")))]
 #[unsafe(no_mangle)]

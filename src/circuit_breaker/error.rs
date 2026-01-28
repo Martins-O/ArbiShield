@@ -1,7 +1,10 @@
 //! Error types for the CircuitBreaker contract
 
+extern crate alloc;
+
+use alloc::vec::Vec;
 use alloy_primitives::Address;
-use alloy_sol_types::sol;
+use alloy_sol_types::{sol, SolError};
 
 sol! {
     /// Emitted when attempting to trip an already tripped circuit
@@ -33,13 +36,13 @@ pub enum Error {
 impl From<Error> for Vec<u8> {
     fn from(err: Error) -> Vec<u8> {
         match err {
-            Error::AlreadyTripped => AlreadyTripped {}.encode(),
-            Error::NotTripped => NotTripped {}.encode(),
+            Error::AlreadyTripped => AlreadyTripped {}.abi_encode(),
+            Error::NotTripped => NotTripped {}.abi_encode(),
             Error::UnauthorizedCaller(caller) => {
-                UnauthorizedCaller { caller }.encode()
+                UnauthorizedCaller { caller }.abi_encode()
             }
             Error::InvalidOwner(owner) => {
-                InvalidOwner { owner }.encode()
+                InvalidOwner { owner }.abi_encode()
             }
         }
     }

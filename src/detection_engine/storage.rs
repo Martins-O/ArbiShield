@@ -1,6 +1,11 @@
 //! Storage structures for the DetectionEngine contract
 
-use stylus_sdk::storage::{StorageAddress, StorageMap, StorageU256};
+extern crate alloc;
+
+#[allow(unused_imports)]
+use alloc::{vec, vec::Vec};
+
+use stylus_sdk::prelude::*;
 use stylus_sdk::stylus_proc::sol_storage;
 
 sol_storage! {

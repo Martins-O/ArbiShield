@@ -1,7 +1,10 @@
 //! Error types for the AlertRegistry contract
 
+extern crate alloc;
+
+use alloc::vec::Vec;
 use alloy_primitives::{Address, U256};
-use alloy_sol_types::sol;
+use alloy_sol_types::{sol, SolError};
 
 sol! {
     /// Emitted when an alert ID is not found
@@ -34,16 +37,16 @@ impl From<Error> for Vec<u8> {
     fn from(err: Error) -> Vec<u8> {
         match err {
             Error::AlertNotFound { id } => {
-                AlertNotFound { id }.encode()
+                AlertNotFound { id }.abi_encode()
             }
             Error::InvalidAlert => {
-                InvalidAlert {}.encode()
+                InvalidAlert {}.abi_encode()
             }
             Error::UnauthorizedCaller(caller) => {
-                UnauthorizedCaller { caller }.encode()
+                UnauthorizedCaller { caller }.abi_encode()
             }
             Error::InvalidOwner(owner) => {
-                InvalidOwner { owner }.encode()
+                InvalidOwner { owner }.abi_encode()
             }
         }
     }
