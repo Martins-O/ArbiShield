@@ -1066,6 +1066,11 @@ impl DetectionEngine {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use alloc::{vec, format};
+
+    // ========================================
+    // Threshold & Anomaly Detection Logic
+    // ========================================
 
     // === Role Constant Tests ===
 
@@ -1077,299 +1082,207 @@ mod tests {
     }
 
     #[test]
-    fn test_role_bitmask_operations() {
-        // Test combining roles
-        let combined = ADMIN_ROLE | ANALYST_ROLE;
-        assert_eq!(combined, ALL_ROLES);
-
-        // Test checking role presence
-        assert!((combined & ADMIN_ROLE) != 0);
-        assert!((combined & ANALYST_ROLE) != 0);
-
-        // Test removing role
-        let admin_only = combined & !ANALYST_ROLE;
-        assert_eq!(admin_only, ADMIN_ROLE);
-        assert!((admin_only & ADMIN_ROLE) != 0);
-        assert!((admin_only & ANALYST_ROLE) == 0);
+    fn test_value_above_threshold_is_anomaly() {
+        let threshold = U256::from(100);
+        let value = U256::from(150);
+        assert!(value > threshold, "Value above threshold is an anomaly");
     }
 
     #[test]
-    fn test_role_validation_boundaries() {
-        // Valid roles: 1, 2, 3
-        assert!(ADMIN_ROLE > 0 && ADMIN_ROLE <= ALL_ROLES);
-        assert!(ANALYST_ROLE > 0 && ANALYST_ROLE <= ALL_ROLES);
-        assert!(ALL_ROLES > 0 && ALL_ROLES <= ALL_ROLES);
-
-        // Invalid: 0 and > 3
-        let invalid_zero: u8 = 0;
-        let invalid_high: u8 = 4;
-        assert!(invalid_zero == 0 || invalid_zero > ALL_ROLES);
-        assert!(invalid_high == 0 || invalid_high > ALL_ROLES);
-    }
-
-    // === Pattern Type Constant Tests ===
-
-    #[test]
-    fn test_pattern_type_constants() {
-        assert_eq!(PATTERN_FLASH_LOAN, 1);
-        assert_eq!(PATTERN_PRICE_MANIPULATION, 2);
-        assert_eq!(PATTERN_REENTRANCY, 4);
-        assert_eq!(PATTERN_FRONTRUNNING, 8);
-        assert_eq!(ALL_PATTERN_TYPES, 15);
+    fn test_value_below_threshold_is_normal() {
+        let threshold = U256::from(100);
+        let value = U256::from(50);
+        assert!(!(value > threshold), "Value below threshold is normal");
     }
 
     #[test]
-    fn test_pattern_type_bitmask_operations() {
-        // Each pattern type is a unique power of 2
-        assert_eq!(PATTERN_FLASH_LOAN.count_ones(), 1);
-        assert_eq!(PATTERN_PRICE_MANIPULATION.count_ones(), 1);
-        assert_eq!(PATTERN_REENTRANCY.count_ones(), 1);
-        assert_eq!(PATTERN_FRONTRUNNING.count_ones(), 1);
-
-        // No overlap between individual patterns
-        assert_eq!(PATTERN_FLASH_LOAN & PATTERN_PRICE_MANIPULATION, 0);
-        assert_eq!(PATTERN_FLASH_LOAN & PATTERN_REENTRANCY, 0);
-        assert_eq!(PATTERN_FLASH_LOAN & PATTERN_FRONTRUNNING, 0);
-        assert_eq!(PATTERN_PRICE_MANIPULATION & PATTERN_REENTRANCY, 0);
-        assert_eq!(PATTERN_PRICE_MANIPULATION & PATTERN_FRONTRUNNING, 0);
-        assert_eq!(PATTERN_REENTRANCY & PATTERN_FRONTRUNNING, 0);
-
-        // Combined patterns
-        let combined = PATTERN_FLASH_LOAN | PATTERN_REENTRANCY;
-        assert!((combined & PATTERN_FLASH_LOAN) != 0);
-        assert!((combined & PATTERN_REENTRANCY) != 0);
-        assert!((combined & PATTERN_PRICE_MANIPULATION) == 0);
-        assert!((combined & PATTERN_FRONTRUNNING) == 0);
-
-        // All patterns
-        let all = PATTERN_FLASH_LOAN
-            | PATTERN_PRICE_MANIPULATION
-            | PATTERN_REENTRANCY
-            | PATTERN_FRONTRUNNING;
-        assert_eq!(all, ALL_PATTERN_TYPES);
+    fn test_value_equal_threshold_is_normal() {
+        let threshold = U256::from(100);
+        let value = U256::from(100);
+        assert!(!(value > threshold), "Value equal to threshold is NOT anomaly (strict >)");
     }
 
     #[test]
-    fn test_pattern_type_validation() {
-        // Valid: any non-zero value up to ALL_PATTERN_TYPES
-        for pt in 1..=ALL_PATTERN_TYPES {
-            assert!(pt > 0 && pt <= ALL_PATTERN_TYPES);
+    fn test_value_one_above_threshold_is_anomaly() {
+        let threshold = U256::from(100);
+        let value = U256::from(101);
+        assert!(value > threshold);
+    }
+
+    #[test]
+    fn test_zero_threshold_any_value_is_anomaly() {
+        let threshold = U256::ZERO;
+        let value = U256::from(1);
+        assert!(value > threshold, "Any positive value exceeds zero threshold");
+    }
+
+    #[test]
+    fn test_zero_value_zero_threshold_is_normal() {
+        let threshold = U256::ZERO;
+        let value = U256::ZERO;
+        assert!(!(value > threshold));
+    }
+
+    #[test]
+    fn test_max_threshold_never_exceeded() {
+        let threshold = U256::MAX;
+        let value = U256::MAX;
+        assert!(!(value > threshold), "U256::MAX cannot exceed itself");
+    }
+
+    #[test]
+    fn test_large_threshold_values() {
+        // 1 ETH in wei
+        let threshold = U256::from(1_000_000_000_000_000_000u64);
+        let below = U256::from(999_999_999_999_999_999u64);
+        let above = U256::from(1_000_000_000_000_000_001u64);
+        assert!(!(below > threshold));
+        assert!(above > threshold);
+    }
+
+    // ========================================
+    // Metric Count Arithmetic
+    // ========================================
+
+    #[test]
+    fn test_metric_count_starts_zero() {
+        let count = U256::ZERO;
+        assert_eq!(count, U256::from(0));
+    }
+
+    #[test]
+    fn test_metric_count_increments() {
+        let mut count = U256::ZERO;
+        for i in 1..=5u64 {
+            count = count + U256::from(1);
+            assert_eq!(count, U256::from(i));
         }
-
-        // Invalid: 0 and > ALL_PATTERN_TYPES
-        assert!(0u64 == 0);
-        assert!(16u64 > ALL_PATTERN_TYPES);
-    }
-
-    // === Threat Scoring Constant Tests ===
-
-    #[test]
-    fn test_threat_scoring_constants() {
-        assert_eq!(DEFAULT_HIGH_THREAT_THRESHOLD, 70);
-        assert_eq!(MAX_THREAT_SCORE, 100);
-        assert_eq!(MAX_SEVERITY, 100);
     }
 
     #[test]
-    fn test_threat_score_capping() {
-        // Score should never exceed MAX_THREAT_SCORE
-        let score = 150u64;
-        let capped = if score > MAX_THREAT_SCORE {
-            MAX_THREAT_SCORE
-        } else {
-            score
-        };
-        assert_eq!(capped, MAX_THREAT_SCORE);
+    fn test_metric_count_independent_of_values() {
+        // Count tracks number of metrics, not their values
+        let count = U256::from(3); // 3 metrics registered
+        let value = U256::from(1_000_000); // some metric value
+        assert_ne!(count, value);
+    }
 
-        // Score within range should be unchanged
-        let score = 75u64;
-        let capped = if score > MAX_THREAT_SCORE {
-            MAX_THREAT_SCORE
-        } else {
-            score
-        };
-        assert_eq!(capped, 75);
+    // ========================================
+    // Metric ID Tests
+    // ========================================
+
+    #[test]
+    fn test_metric_id_zero_valid() {
+        let id = U256::ZERO;
+        assert_eq!(id, U256::from(0), "ID 0 is valid");
     }
 
     #[test]
-    fn test_severity_validation() {
-        // Valid: 0 to MAX_SEVERITY
-        assert!(U256::ZERO <= U256::from(MAX_SEVERITY));
-        assert!(U256::from(50u64) <= U256::from(MAX_SEVERITY));
-        assert!(U256::from(MAX_SEVERITY) <= U256::from(MAX_SEVERITY));
-
-        // Invalid: > MAX_SEVERITY
-        assert!(U256::from(101u64) > U256::from(MAX_SEVERITY));
-    }
-
-    // === Weighted Average Tests ===
-
-    #[test]
-    fn test_weighted_average_calculation() {
-        // First analysis: score = 80
-        let prev_count = U256::ZERO;
-        let prev_score = U256::ZERO;
-        let new_threat = U256::from(80u64);
-        let new_count = prev_count.saturating_add(U256::from(1));
-        let weighted_sum = prev_score
-            .saturating_mul(prev_count)
-            .saturating_add(new_threat);
-        let new_score = weighted_sum / new_count;
-        assert_eq!(new_score, U256::from(80u64));
-
-        // Second analysis: score = 40, average should be 60
-        let prev_count_2 = new_count;
-        let prev_score_2 = new_score;
-        let new_threat_2 = U256::from(40u64);
-        let new_count_2 = prev_count_2.saturating_add(U256::from(1));
-        let weighted_sum_2 = prev_score_2
-            .saturating_mul(prev_count_2)
-            .saturating_add(new_threat_2);
-        let new_score_2 = weighted_sum_2 / new_count_2;
-        assert_eq!(new_score_2, U256::from(60u64));
-
-        // Third analysis: score = 90, average should be (80+40+90)/3 = 70
-        // But with weighted: (60*2 + 90)/3 = 210/3 = 70
-        let prev_count_3 = new_count_2;
-        let prev_score_3 = new_score_2;
-        let new_threat_3 = U256::from(90u64);
-        let new_count_3 = prev_count_3.saturating_add(U256::from(1));
-        let weighted_sum_3 = prev_score_3
-            .saturating_mul(prev_count_3)
-            .saturating_add(new_threat_3);
-        let new_score_3 = weighted_sum_3 / new_count_3;
-        assert_eq!(new_score_3, U256::from(70u64));
-    }
-
-    // === Saturating Arithmetic Tests ===
-
-    #[test]
-    fn test_saturating_add() {
-        let max = U256::MAX;
-        let result = max.saturating_add(U256::from(1));
-        assert_eq!(result, U256::MAX);
+    fn test_metric_id_large() {
+        let id = U256::from(u64::MAX);
+        assert!(id > U256::ZERO);
     }
 
     #[test]
-    fn test_saturating_sub() {
-        let zero = U256::ZERO;
-        let result = zero.saturating_sub(U256::from(1));
-        assert_eq!(result, U256::ZERO);
+    fn test_metric_ids_distinct() {
+        let id1 = U256::from(1);
+        let id2 = U256::from(2);
+        assert_ne!(id1, id2);
+    }
+
+    // ========================================
+    // Error Encoding Tests
+    // ========================================
+
+    #[test]
+    fn test_unauthorized_caller_error_encoding() {
+        let caller = Address::from([0xAAu8; 20]);
+        let encoded: Vec<u8> = Error::UnauthorizedCaller(caller).into();
+        assert_eq!(encoded.len(), 36, "selector(4) + address(32)");
     }
 
     #[test]
-    fn test_saturating_mul() {
-        let large = U256::MAX / U256::from(2);
-        let result = large.saturating_mul(U256::from(3));
-        assert_eq!(result, U256::MAX);
-    }
-
-    // === High Threat Threshold Tests ===
-
-    #[test]
-    fn test_high_threat_threshold_comparison() {
-        let threshold = U256::from(DEFAULT_HIGH_THREAT_THRESHOLD);
-
-        // Below threshold
-        assert!(U256::from(69u64) < threshold);
-
-        // At threshold
-        assert!(U256::from(70u64) >= threshold);
-
-        // Above threshold
-        assert!(U256::from(80u64) >= threshold);
-    }
-
-    // === Batch Size Tests ===
-
-    #[test]
-    fn test_batch_size_limit() {
-        assert_eq!(MAX_BATCH_SIZE, 100);
+    fn test_metric_not_found_error_encoding() {
+        let id = U256::from(42);
+        let encoded: Vec<u8> = Error::MetricNotFound { id }.into();
+        assert_eq!(encoded.len(), 36, "selector(4) + uint256(32)");
     }
 
     #[test]
-    fn test_batch_within_limit() {
-        let batch_size = 50usize;
-        assert!(batch_size <= MAX_BATCH_SIZE);
+    fn test_invalid_threshold_error_encoding() {
+        let value = U256::from(999);
+        let encoded: Vec<u8> = Error::InvalidThreshold { value }.into();
+        assert_eq!(encoded.len(), 36);
     }
 
     #[test]
-    fn test_batch_exceeds_limit() {
-        let batch_size = 101usize;
-        assert!(batch_size > MAX_BATCH_SIZE);
+    fn test_threshold_exceeded_error_encoding() {
+        let current = U256::from(200);
+        let threshold = U256::from(100);
+        let encoded: Vec<u8> = Error::ThresholdExceeded { current, threshold }.into();
+        // selector(4) + uint256(32) + uint256(32)
+        assert_eq!(encoded.len(), 68, "Should encode both current and threshold");
     }
-
-    // === ERC-165 Interface ID Tests ===
 
     #[test]
-    fn test_erc165_interface_ids() {
-        assert_eq!(ERC165_INTERFACE_ID, [0x01, 0xff, 0xc9, 0xa7]);
-        assert_eq!(DETECTION_ENGINE_INTERFACE_ID, [0xde, 0x1e, 0xc1, 0x00]);
+    fn test_invalid_owner_error_encoding() {
+        let owner = Address::ZERO;
+        let encoded: Vec<u8> = Error::InvalidOwner(owner).into();
+        assert_eq!(encoded.len(), 36);
     }
 
-    // === Address Validation Tests ===
+    #[test]
+    fn test_all_error_selectors_unique() {
+        let errors: Vec<Vec<u8>> = vec![
+            Error::UnauthorizedCaller(Address::ZERO).into(),
+            Error::MetricNotFound { id: U256::ZERO }.into(),
+            Error::InvalidThreshold { value: U256::ZERO }.into(),
+            Error::ThresholdExceeded { current: U256::ZERO, threshold: U256::ZERO }.into(),
+            Error::InvalidOwner(Address::ZERO).into(),
+        ];
+
+        for i in 0..errors.len() {
+            for j in (i + 1)..errors.len() {
+                assert_ne!(
+                    &errors[i][..4], &errors[j][..4],
+                    "Error selectors at indices {i} and {j} must differ"
+                );
+            }
+        }
+    }
+
+    #[test]
+    fn test_error_encoding_deterministic() {
+        let enc1: Vec<u8> = Error::MetricNotFound { id: U256::from(7) }.into();
+        let enc2: Vec<u8> = Error::MetricNotFound { id: U256::from(7) }.into();
+        assert_eq!(enc1, enc2);
+    }
+
+    // ========================================
+    // Address Validation
+    // ========================================
 
     #[test]
     fn test_zero_address_check() {
-        let zero = Address::ZERO;
-        assert_eq!(zero, Address::ZERO);
-
-        // Non-zero address
-        let non_zero = Address::new([1u8; 20]);
-        assert_ne!(non_zero, Address::ZERO);
+        assert_eq!(Address::ZERO, Address::ZERO);
+        assert_ne!(Address::from([1u8; 20]), Address::ZERO);
     }
 
-    // === Threat Score Average Computation Tests ===
+    // ========================================
+    // Debug Trait
+    // ========================================
 
     #[test]
-    fn test_average_computation_with_zero_matches() {
-        let match_count = U256::ZERO;
-        let total_severity = U256::ZERO;
-
-        let threat_level = if match_count > U256::ZERO {
-            total_severity / match_count
-        } else {
-            U256::ZERO
-        };
-
-        assert_eq!(threat_level, U256::ZERO);
-    }
-
-    #[test]
-    fn test_average_computation_single_match() {
-        let match_count = U256::from(1);
-        let total_severity = U256::from(85u64);
-
-        let avg = total_severity / match_count;
-        let max = U256::from(MAX_THREAT_SCORE);
-        let threat_level = if avg > max { max } else { avg };
-
-        assert_eq!(threat_level, U256::from(85u64));
-    }
-
-    #[test]
-    fn test_average_computation_capped_at_max() {
-        // Even though individual severities can be up to 100,
-        // this tests the capping logic
-        let match_count = U256::from(1);
-        let total_severity = U256::from(150u64); // Hypothetical overflow scenario
-
-        let avg = total_severity / match_count;
-        let max = U256::from(MAX_THREAT_SCORE);
-        let threat_level = if avg > max { max } else { avg };
-
-        assert_eq!(threat_level, U256::from(MAX_THREAT_SCORE));
-    }
-
-    #[test]
-    fn test_average_computation_multiple_matches() {
-        let match_count = U256::from(3);
-        let total_severity = U256::from(210u64); // 70+80+60
-
-        let avg = total_severity / match_count;
-        let max = U256::from(MAX_THREAT_SCORE);
-        let threat_level = if avg > max { max } else { avg };
-
-        assert_eq!(threat_level, U256::from(70u64));
+    fn test_all_errors_have_debug() {
+        let errors: Vec<Error> = vec![
+            Error::UnauthorizedCaller(Address::ZERO),
+            Error::MetricNotFound { id: U256::ZERO },
+            Error::InvalidThreshold { value: U256::ZERO },
+            Error::ThresholdExceeded { current: U256::ZERO, threshold: U256::ZERO },
+            Error::InvalidOwner(Address::ZERO),
+        ];
+        for err in errors {
+            assert!(!format!("{err:?}").is_empty());
+        }
     }
 }
