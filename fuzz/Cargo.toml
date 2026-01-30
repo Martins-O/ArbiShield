@@ -1,0 +1,64 @@
+[package]
+name = "arbishield-fuzz"
+version = "0.0.0"
+publish = false
+edition = "2021"
+
+[package.metadata]
+cargo-fuzz = true
+
+[dependencies]
+libfuzzer-sys = "0.4"
+arbitrary = { version = "1.4", features = ["derive"] }
+
+[dependencies.arbishield]
+path = ".."
+
+# Prevent this from interfering with workspaces
+[workspace]
+members = ["."]
+
+[profile.release]
+debug = 1
+
+[[bin]]
+name = "alert_registry_priority"
+path = "fuzz_targets/alert_registry_priority.rs"
+test = false
+doc = false
+
+[[bin]]
+name = "alert_registry_errors"
+path = "fuzz_targets/alert_registry_errors.rs"
+test = false
+doc = false
+
+[[bin]]
+name = "circuit_breaker_state"
+path = "fuzz_targets/circuit_breaker_state.rs"
+test = false
+doc = false
+
+[[bin]]
+name = "detection_engine_anomaly"
+path = "fuzz_targets/detection_engine_anomaly.rs"
+test = false
+doc = false
+
+[[bin]]
+name = "cross_contract_errors"
+path = "fuzz_targets/cross_contract_errors.rs"
+test = false
+doc = false
+
+[[bin]]
+name = "rbac_fuzzer"
+path = "fuzz_targets/rbac_fuzzer.rs"
+test = false
+doc = false
+
+[[bin]]
+name = "arithmetic_fuzzer"
+path = "fuzz_targets/arithmetic_fuzzer.rs"
+test = false
+doc = false
