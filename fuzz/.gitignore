@@ -1,0 +1,21 @@
+# Fuzzing artifacts and build outputs
+target/
+artifacts/
+corpus/
+coverage/
+
+# Fuzzer logs
+*.log
+
+# Crash dumps
+crash-*
+leak-*
+timeout-*
+oom-*
+
+# Coverage reports
+*.profdata
+*.profraw
+
+# LibFuzzer specific
+default.profdata
