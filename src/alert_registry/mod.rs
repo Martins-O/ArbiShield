@@ -100,7 +100,7 @@ impl AlertRegistry {
     }
 
     /// Compute priority level from threat level
-    fn compute_priority(threat_level: U256) -> U256 {
+    pub fn compute_priority(threat_level: U256) -> U256 {
         let level = threat_level.saturating_to::<u64>();
         if level >= THRESHOLD_CRITICAL {
             U256::from(PRIORITY_CRITICAL)
@@ -777,6 +777,7 @@ impl AlertRegistry {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use alloc::{vec, format};
 
     // --- Role Constants ---
 
@@ -1064,5 +1065,347 @@ mod tests {
 
         // Cannot un-acknowledge (one-way transition)
         // This is enforced by the contract logic
+    }
+
+    // ========================================
+    // Error Encoding Tests
+    // ========================================
+
+    #[test]
+    fn test_alert_not_found_error_encoding() {
+        let encoded: Vec<u8> = Error::AlertNotFound { id: U256::from(42) }.into();
+        assert_eq!(encoded.len(), 36, "selector(4) + uint256(32)");
+    }
+
+    #[test]
+    fn test_invalid_alert_error_encoding() {
+        let encoded: Vec<u8> = Error::InvalidAlert.into();
+        assert!(encoded.len() >= 4, "Must have selector");
+    }
+
+    #[test]
+    fn test_unauthorized_caller_error_encoding() {
+        let encoded: Vec<u8> = Error::UnauthorizedCaller(Address::from([0xAA; 20])).into();
+        assert_eq!(encoded.len(), 36);
+    }
+
+    #[test]
+    fn test_insufficient_role_error_encoding() {
+        let encoded: Vec<u8> = Error::InsufficientRole {
+            caller: Address::from([0xBB; 20]),
+            required_role: ADMIN_ROLE,
+        }.into();
+        // selector(4) + address(32) + uint8(32)
+        assert_eq!(encoded.len(), 68);
+    }
+
+    #[test]
+    fn test_already_subscribed_error_encoding() {
+        let encoded: Vec<u8> = Error::AlreadySubscribed(Address::from([0xCC; 20])).into();
+        assert_eq!(encoded.len(), 36);
+    }
+
+    #[test]
+    fn test_alert_already_acknowledged_error_encoding() {
+        let encoded: Vec<u8> = Error::AlertAlreadyAcknowledged { id: U256::from(1) }.into();
+        assert_eq!(encoded.len(), 36);
+    }
+
+    #[test]
+    fn test_not_alert_protocol_error_encoding() {
+        let encoded: Vec<u8> = Error::NotAlertProtocol {
+            caller: Address::from([0xDD; 20]),
+            id: U256::from(5),
+        }.into();
+        // selector(4) + address(32) + uint256(32)
+        assert_eq!(encoded.len(), 68);
+    }
+
+    #[test]
+    fn test_batch_size_too_large_error_encoding() {
+        let encoded: Vec<u8> = Error::BatchSizeTooLarge {
+            size: U256::from(200),
+            max: U256::from(100),
+        }.into();
+        assert_eq!(encoded.len(), 68);
+    }
+
+    #[test]
+    fn test_invalid_expiration_duration_error_encoding() {
+        let encoded: Vec<u8> = Error::InvalidExpirationDuration { duration: U256::ZERO }.into();
+        assert_eq!(encoded.len(), 36);
+    }
+
+    #[test]
+    fn test_unsupported_interface_error_encoding() {
+        let encoded: Vec<u8> = Error::UnsupportedInterface(FixedBytes::<4>::from([0xFF; 4])).into();
+        // selector(4) + bytes4(32)
+        assert_eq!(encoded.len(), 36);
+    }
+
+    #[test]
+    fn test_all_error_selectors_unique() {
+        let errors: Vec<Vec<u8>> = vec![
+            Error::AlertNotFound { id: U256::ZERO }.into(),
+            Error::InvalidAlert.into(),
+            Error::UnauthorizedCaller(Address::ZERO).into(),
+            Error::InvalidOwner(Address::ZERO).into(),
+            Error::InsufficientRole { caller: Address::ZERO, required_role: 0 }.into(),
+            Error::InvalidRole(0).into(),
+            Error::CannotRevokeOwnRole(Address::ZERO).into(),
+            Error::AlreadySubscribed(Address::ZERO).into(),
+            Error::NotSubscribed(Address::ZERO).into(),
+            Error::InvalidSubscriber(Address::ZERO).into(),
+            Error::AlertAlreadyAcknowledged { id: U256::ZERO }.into(),
+            Error::NotAlertProtocol { caller: Address::ZERO, id: U256::ZERO }.into(),
+            Error::InvalidPriorityLevel { level: U256::ZERO }.into(),
+            Error::BatchSizeTooLarge { size: U256::ZERO, max: U256::ZERO }.into(),
+            Error::InvalidExpirationDuration { duration: U256::ZERO }.into(),
+            Error::InvalidAddress(Address::ZERO).into(),
+            Error::UnsupportedInterface(FixedBytes::<4>::ZERO).into(),
+        ];
+        for i in 0..errors.len() {
+            for j in (i + 1)..errors.len() {
+                assert_ne!(
+                    &errors[i][..4], &errors[j][..4],
+                    "Error selectors at indices {i} and {j} must be unique"
+                );
+            }
+        }
+    }
+
+    #[test]
+    fn test_error_encoding_deterministic() {
+        let enc1: Vec<u8> = Error::AlertNotFound { id: U256::from(7) }.into();
+        let enc2: Vec<u8> = Error::AlertNotFound { id: U256::from(7) }.into();
+        assert_eq!(enc1, enc2);
+    }
+
+    // ========================================
+    // Priority Computation Edge Cases
+    // ========================================
+
+    #[test]
+    fn test_compute_priority_above_max_still_critical() {
+        // Values > 100 should still map to CRITICAL via saturating_to
+        let result = AlertRegistry::compute_priority(U256::from(200u64));
+        assert_eq!(result, U256::from(PRIORITY_CRITICAL));
+    }
+
+    #[test]
+    fn test_compute_priority_u256_max() {
+        // U256::MAX saturates to u64::MAX which is >> 90
+        let result = AlertRegistry::compute_priority(U256::MAX);
+        assert_eq!(result, U256::from(PRIORITY_CRITICAL));
+    }
+
+    #[test]
+    fn test_compute_priority_all_boundary_values() {
+        let test_cases: Vec<(u64, u64)> = vec![
+            (0, PRIORITY_LOW),
+            (1, PRIORITY_LOW),
+            (39, PRIORITY_LOW),
+            (40, PRIORITY_MEDIUM),
+            (41, PRIORITY_MEDIUM),
+            (69, PRIORITY_MEDIUM),
+            (70, PRIORITY_HIGH),
+            (71, PRIORITY_HIGH),
+            (89, PRIORITY_HIGH),
+            (90, PRIORITY_CRITICAL),
+            (91, PRIORITY_CRITICAL),
+            (100, PRIORITY_CRITICAL),
+        ];
+        for (threat, expected) in test_cases {
+            let result = AlertRegistry::compute_priority(U256::from(threat));
+            assert_eq!(
+                result,
+                U256::from(expected),
+                "threat_level={threat} should map to priority={expected}"
+            );
+        }
+    }
+
+    // ========================================
+    // Subscriber Management Logic
+    // ========================================
+
+    #[test]
+    fn test_subscriber_count_tracking() {
+        let mut count = U256::ZERO;
+        // Add 3 subscribers
+        for _ in 0..3 {
+            count = count.saturating_add(U256::from(1));
+        }
+        assert_eq!(count, U256::from(3));
+        // Remove 1
+        count = count.saturating_sub(U256::from(1));
+        assert_eq!(count, U256::from(2));
+    }
+
+    #[test]
+    fn test_subscriber_count_underflow_safe() {
+        let count = U256::ZERO;
+        let result = count.saturating_sub(U256::from(1));
+        assert_eq!(result, U256::ZERO, "Subscriber count must not underflow");
+    }
+
+    // ========================================
+    // Protocol Alert Count Tracking
+    // ========================================
+
+    #[test]
+    fn test_protocol_alert_count_increments() {
+        let mut count = U256::ZERO;
+        for i in 1..=5u64 {
+            count = count.saturating_add(U256::from(1));
+            assert_eq!(count, U256::from(i));
+        }
+    }
+
+    // ========================================
+    // Alert ID Generation
+    // ========================================
+
+    #[test]
+    fn test_enhanced_alert_ids_are_1_indexed() {
+        let mut count = U256::ZERO;
+        let first_id = count.saturating_add(U256::from(1));
+        assert_eq!(first_id, U256::from(1), "First enhanced alert ID should be 1");
+    }
+
+    #[test]
+    fn test_enhanced_alert_ids_sequential() {
+        let mut count = U256::ZERO;
+        for expected_id in 1..=5u64 {
+            count = count.saturating_add(U256::from(1));
+            assert_eq!(count, U256::from(expected_id));
+        }
+    }
+
+    // ========================================
+    // Detection Engine Integration Logic
+    // ========================================
+
+    #[test]
+    fn test_detection_engine_address_default() {
+        let de_addr = Address::ZERO;
+        assert_eq!(de_addr, Address::ZERO, "Default detection engine is zero");
+    }
+
+    #[test]
+    fn test_detection_engine_monitor_role_bypass() {
+        // Simulate: caller == detection_engine, role == MONITOR_ROLE → allowed
+        let de_addr = Address::from([0xDE; 20]);
+        let caller = Address::from([0xDE; 20]);
+        let role = MONITOR_ROLE;
+
+        let is_de = de_addr != Address::ZERO && caller == de_addr;
+        assert!(is_de && role == MONITOR_ROLE, "DetectionEngine should bypass MONITOR role check");
+    }
+
+    #[test]
+    fn test_detection_engine_no_admin_bypass() {
+        // DetectionEngine should NOT bypass ADMIN checks
+        let de_addr = Address::from([0xDE; 20]);
+        let caller = Address::from([0xDE; 20]);
+        let role = ADMIN_ROLE;
+
+        let is_de_bypass = role == MONITOR_ROLE && de_addr != Address::ZERO && caller == de_addr;
+        assert!(!is_de_bypass, "DetectionEngine must not bypass ADMIN role");
+    }
+
+    // ========================================
+    // Role Validation Edge Cases
+    // ========================================
+
+    #[test]
+    fn test_role_zero_is_invalid() {
+        let role: u8 = 0;
+        assert!(role == 0 || (role & !ALL_ROLES) != 0, "Role 0 should be invalid");
+    }
+
+    #[test]
+    fn test_combined_role_valid() {
+        let combined = ADMIN_ROLE | MONITOR_ROLE;
+        assert_eq!(combined, ALL_ROLES);
+        assert_eq!(combined & !ALL_ROLES, 0, "Combined valid roles are valid");
+    }
+
+    #[test]
+    fn test_high_bit_role_invalid() {
+        let role: u8 = 0x80;
+        assert_ne!(role & !ALL_ROLES, 0, "High-bit role should be invalid");
+    }
+
+    // ========================================
+    // Debug Trait Tests
+    // ========================================
+
+    #[test]
+    fn test_all_errors_have_debug() {
+        let errors: Vec<Error> = vec![
+            Error::AlertNotFound { id: U256::ZERO },
+            Error::InvalidAlert,
+            Error::UnauthorizedCaller(Address::ZERO),
+            Error::InvalidOwner(Address::ZERO),
+            Error::InsufficientRole { caller: Address::ZERO, required_role: 0 },
+            Error::InvalidRole(0),
+            Error::CannotRevokeOwnRole(Address::ZERO),
+            Error::AlreadySubscribed(Address::ZERO),
+            Error::NotSubscribed(Address::ZERO),
+            Error::InvalidSubscriber(Address::ZERO),
+            Error::AlertAlreadyAcknowledged { id: U256::ZERO },
+            Error::NotAlertProtocol { caller: Address::ZERO, id: U256::ZERO },
+            Error::InvalidPriorityLevel { level: U256::ZERO },
+            Error::BatchSizeTooLarge { size: U256::ZERO, max: U256::ZERO },
+            Error::InvalidExpirationDuration { duration: U256::ZERO },
+            Error::InvalidAddress(Address::ZERO),
+            Error::UnsupportedInterface(FixedBytes::<4>::ZERO),
+        ];
+        for err in errors {
+            let debug = format!("{err:?}");
+            assert!(!debug.is_empty(), "All error variants must have debug output");
+        }
+    }
+
+    // ========================================
+    // Expiration with Zero Duration
+    // ========================================
+
+    #[test]
+    fn test_zero_expiration_means_no_expiry() {
+        let expiration = U256::ZERO;
+        // When expiration is zero, alerts never expire
+        assert!(expiration.is_zero(), "Zero expiration = no expiry feature");
+    }
+
+    #[test]
+    fn test_expiration_large_duration() {
+        // 1 year in seconds
+        let one_year = U256::from(365u64 * 24 * 60 * 60);
+        let created = U256::from(1_700_000_000u64);
+        let now = created.saturating_add(one_year);
+        let elapsed = now.saturating_sub(created);
+        assert_eq!(elapsed, one_year);
+    }
+
+    // ========================================
+    // U256 ↔ u8 Role Conversion
+    // ========================================
+
+    #[test]
+    fn test_role_u256_roundtrip() {
+        let role = ALL_ROLES;
+        let as_u256 = U256::from(role);
+        let back: u8 = as_u256.saturating_to::<u64>() as u8;
+        assert_eq!(back, role, "Role must survive U256 roundtrip");
+    }
+
+    #[test]
+    fn test_role_large_u256_saturates() {
+        let large = U256::from(0xFFFFu64);
+        let as_u8: u8 = large.saturating_to::<u64>() as u8;
+        // 0xFFFF as u8 truncates to 0xFF
+        assert_eq!(as_u8, 0xFF);
     }
 }

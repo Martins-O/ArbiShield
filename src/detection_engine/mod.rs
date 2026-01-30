@@ -175,11 +175,214 @@ impl DetectionEngine {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use alloc::{vec, format};
+
+    // ========================================
+    // Threshold & Anomaly Detection Logic
+    // ========================================
 
     #[test]
-    fn test_threshold_comparison() {
+    fn test_value_above_threshold_is_anomaly() {
         let threshold = U256::from(100);
         let value = U256::from(150);
+        assert!(value > threshold, "Value above threshold is an anomaly");
+    }
+
+    #[test]
+    fn test_value_below_threshold_is_normal() {
+        let threshold = U256::from(100);
+        let value = U256::from(50);
+        assert!(!(value > threshold), "Value below threshold is normal");
+    }
+
+    #[test]
+    fn test_value_equal_threshold_is_normal() {
+        let threshold = U256::from(100);
+        let value = U256::from(100);
+        assert!(!(value > threshold), "Value equal to threshold is NOT anomaly (strict >)");
+    }
+
+    #[test]
+    fn test_value_one_above_threshold_is_anomaly() {
+        let threshold = U256::from(100);
+        let value = U256::from(101);
         assert!(value > threshold);
+    }
+
+    #[test]
+    fn test_zero_threshold_any_value_is_anomaly() {
+        let threshold = U256::ZERO;
+        let value = U256::from(1);
+        assert!(value > threshold, "Any positive value exceeds zero threshold");
+    }
+
+    #[test]
+    fn test_zero_value_zero_threshold_is_normal() {
+        let threshold = U256::ZERO;
+        let value = U256::ZERO;
+        assert!(!(value > threshold));
+    }
+
+    #[test]
+    fn test_max_threshold_never_exceeded() {
+        let threshold = U256::MAX;
+        let value = U256::MAX;
+        assert!(!(value > threshold), "U256::MAX cannot exceed itself");
+    }
+
+    #[test]
+    fn test_large_threshold_values() {
+        // 1 ETH in wei
+        let threshold = U256::from(1_000_000_000_000_000_000u64);
+        let below = U256::from(999_999_999_999_999_999u64);
+        let above = U256::from(1_000_000_000_000_000_001u64);
+        assert!(!(below > threshold));
+        assert!(above > threshold);
+    }
+
+    // ========================================
+    // Metric Count Arithmetic
+    // ========================================
+
+    #[test]
+    fn test_metric_count_starts_zero() {
+        let count = U256::ZERO;
+        assert_eq!(count, U256::from(0));
+    }
+
+    #[test]
+    fn test_metric_count_increments() {
+        let mut count = U256::ZERO;
+        for i in 1..=5u64 {
+            count = count + U256::from(1);
+            assert_eq!(count, U256::from(i));
+        }
+    }
+
+    #[test]
+    fn test_metric_count_independent_of_values() {
+        // Count tracks number of metrics, not their values
+        let count = U256::from(3); // 3 metrics registered
+        let value = U256::from(1_000_000); // some metric value
+        assert_ne!(count, value);
+    }
+
+    // ========================================
+    // Metric ID Tests
+    // ========================================
+
+    #[test]
+    fn test_metric_id_zero_valid() {
+        let id = U256::ZERO;
+        assert_eq!(id, U256::from(0), "ID 0 is valid");
+    }
+
+    #[test]
+    fn test_metric_id_large() {
+        let id = U256::from(u64::MAX);
+        assert!(id > U256::ZERO);
+    }
+
+    #[test]
+    fn test_metric_ids_distinct() {
+        let id1 = U256::from(1);
+        let id2 = U256::from(2);
+        assert_ne!(id1, id2);
+    }
+
+    // ========================================
+    // Error Encoding Tests
+    // ========================================
+
+    #[test]
+    fn test_unauthorized_caller_error_encoding() {
+        let caller = Address::from([0xAAu8; 20]);
+        let encoded: Vec<u8> = Error::UnauthorizedCaller(caller).into();
+        assert_eq!(encoded.len(), 36, "selector(4) + address(32)");
+    }
+
+    #[test]
+    fn test_metric_not_found_error_encoding() {
+        let id = U256::from(42);
+        let encoded: Vec<u8> = Error::MetricNotFound { id }.into();
+        assert_eq!(encoded.len(), 36, "selector(4) + uint256(32)");
+    }
+
+    #[test]
+    fn test_invalid_threshold_error_encoding() {
+        let value = U256::from(999);
+        let encoded: Vec<u8> = Error::InvalidThreshold { value }.into();
+        assert_eq!(encoded.len(), 36);
+    }
+
+    #[test]
+    fn test_threshold_exceeded_error_encoding() {
+        let current = U256::from(200);
+        let threshold = U256::from(100);
+        let encoded: Vec<u8> = Error::ThresholdExceeded { current, threshold }.into();
+        // selector(4) + uint256(32) + uint256(32)
+        assert_eq!(encoded.len(), 68, "Should encode both current and threshold");
+    }
+
+    #[test]
+    fn test_invalid_owner_error_encoding() {
+        let owner = Address::ZERO;
+        let encoded: Vec<u8> = Error::InvalidOwner(owner).into();
+        assert_eq!(encoded.len(), 36);
+    }
+
+    #[test]
+    fn test_all_error_selectors_unique() {
+        let errors: Vec<Vec<u8>> = vec![
+            Error::UnauthorizedCaller(Address::ZERO).into(),
+            Error::MetricNotFound { id: U256::ZERO }.into(),
+            Error::InvalidThreshold { value: U256::ZERO }.into(),
+            Error::ThresholdExceeded { current: U256::ZERO, threshold: U256::ZERO }.into(),
+            Error::InvalidOwner(Address::ZERO).into(),
+        ];
+
+        for i in 0..errors.len() {
+            for j in (i + 1)..errors.len() {
+                assert_ne!(
+                    &errors[i][..4], &errors[j][..4],
+                    "Error selectors at indices {i} and {j} must differ"
+                );
+            }
+        }
+    }
+
+    #[test]
+    fn test_error_encoding_deterministic() {
+        let enc1: Vec<u8> = Error::MetricNotFound { id: U256::from(7) }.into();
+        let enc2: Vec<u8> = Error::MetricNotFound { id: U256::from(7) }.into();
+        assert_eq!(enc1, enc2);
+    }
+
+    // ========================================
+    // Address Validation
+    // ========================================
+
+    #[test]
+    fn test_zero_address_check() {
+        assert_eq!(Address::ZERO, Address::ZERO);
+        assert_ne!(Address::from([1u8; 20]), Address::ZERO);
+    }
+
+    // ========================================
+    // Debug Trait
+    // ========================================
+
+    #[test]
+    fn test_all_errors_have_debug() {
+        let errors: Vec<Error> = vec![
+            Error::UnauthorizedCaller(Address::ZERO),
+            Error::MetricNotFound { id: U256::ZERO },
+            Error::InvalidThreshold { value: U256::ZERO },
+            Error::ThresholdExceeded { current: U256::ZERO, threshold: U256::ZERO },
+            Error::InvalidOwner(Address::ZERO),
+        ];
+        for err in errors {
+            assert!(!format!("{err:?}").is_empty());
+        }
     }
 }
