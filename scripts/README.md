@@ -24,6 +24,102 @@ nano .env  # Edit configuration
 
 ## Scripts
 
+### Testing & Coverage Scripts
+
+#### coverage.sh
+**Code coverage report generator (Linux only)**
+
+Generates comprehensive code coverage reports using cargo-tarpaulin.
+
+```bash
+./scripts/coverage.sh
+```
+
+**Features:**
+- ✅ Automatic cargo-tarpaulin installation
+- ✅ Multiple output formats (HTML, XML, JSON)
+- ✅ Coverage badge generation
+- ✅ Threshold checking (95% minimum)
+- ✅ Summary report generation
+
+**Output:**
+- `coverage/index.html` - Interactive HTML report
+- `coverage/cobertura.xml` - XML report for CI/CD
+- `coverage/tarpaulin-report.json` - JSON data
+- `coverage/SUMMARY.md` - Coverage summary
+- `docs/badges/*.svg` - Coverage badges
+
+**Requirements:**
+- Linux OS
+- Rust stable toolchain
+
+**Duration:** ~2-3 minutes
+
+---
+
+#### coverage_grcov.sh
+**Cross-platform coverage report generator**
+
+Generates coverage reports using grcov (works on all platforms).
+
+```bash
+./scripts/coverage_grcov.sh
+```
+
+**Features:**
+- ✅ Cross-platform support (Linux, macOS, Windows)
+- ✅ Automatic grcov installation
+- ✅ Branch coverage tracking
+- ✅ Threshold checking
+- ✅ Clean environment setup
+
+**Output:**
+- `coverage/index.html` - Interactive HTML report
+- `coverage/cobertura.xml` - XML report for CI/CD
+- `coverage/coveralls.json` - JSON data for Coveralls
+
+**Requirements:**
+- Any OS (Linux, macOS, Windows)
+- Rust toolchain
+- grcov (auto-installed)
+- llvm-tools-preview (auto-installed)
+
+**Duration:** ~3-4 minutes
+
+**Use when:**
+- On macOS or Windows
+- cargo-tarpaulin doesn't work
+- Need detailed branch coverage
+
+---
+
+#### gas_report.sh
+**Gas benchmark report generator**
+
+Generates gas consumption reports and benchmarks.
+
+```bash
+./scripts/gas_report.sh
+```
+
+**Features:**
+- ✅ Runs criterion benchmarks
+- ✅ Extracts gas measurements
+- ✅ Generates comparison reports
+- ✅ Creates Markdown tables
+- ✅ JSON output for automation
+
+**Output:**
+- `gas_report.md` - Markdown report
+- `gas_report.json` - JSON data
+- Console output with gas metrics
+
+**Duration:** ~5-10 minutes
+
+---
+
+### Deployment Scripts
+
 ### pre_deploy.sh
 **Pre-deployment validation script**
 
