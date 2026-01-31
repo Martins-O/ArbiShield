@@ -41,21 +41,13 @@ pub enum Error {
 impl From<Error> for Vec<u8> {
     fn from(err: Error) -> Vec<u8> {
         match err {
-            Error::UnauthorizedCaller(caller) => {
-                UnauthorizedCaller { caller }.abi_encode()
-            }
-            Error::MetricNotFound { id } => {
-                MetricNotFound { id }.abi_encode()
-            }
-            Error::InvalidThreshold { value } => {
-                InvalidThreshold { value }.abi_encode()
-            }
+            Error::UnauthorizedCaller(caller) => UnauthorizedCaller { caller }.abi_encode(),
+            Error::MetricNotFound { id } => MetricNotFound { id }.abi_encode(),
+            Error::InvalidThreshold { value } => InvalidThreshold { value }.abi_encode(),
             Error::ThresholdExceeded { current, threshold } => {
                 ThresholdExceeded { current, threshold }.abi_encode()
             }
-            Error::InvalidOwner(owner) => {
-                InvalidOwner { owner }.abi_encode()
-            }
+            Error::InvalidOwner(owner) => InvalidOwner { owner }.abi_encode(),
         }
     }
 }

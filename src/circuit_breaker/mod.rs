@@ -7,8 +7,8 @@ extern crate alloc;
 
 use alloc::vec::Vec;
 use alloy_primitives::{Address, U256};
-use stylus_sdk::{block, evm, msg};
 use stylus_sdk::prelude::*;
+use stylus_sdk::{block, evm, msg};
 
 pub mod error;
 pub mod interface;
@@ -166,7 +166,7 @@ impl CircuitBreaker {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use alloc::{vec, format};
+    use alloc::{format, vec};
 
     // ========================================
     // State Machine Simulation Tests
@@ -248,7 +248,7 @@ mod tests {
         let mut count = U256::from(5);
         let mut _is_tripped = true;
         _is_tripped = false; // reset
-        // count stays the same
+                             // count stays the same
         assert_eq!(count, U256::from(5));
         // next trip increments
         _is_tripped = true;
@@ -391,7 +391,11 @@ mod tests {
     #[test]
     fn test_transfer_to_zero_rejected() {
         let new_owner = Address::ZERO;
-        assert_eq!(new_owner, Address::ZERO, "Transfer to zero should be caught");
+        assert_eq!(
+            new_owner,
+            Address::ZERO,
+            "Transfer to zero should be caught"
+        );
     }
 
     // ========================================
@@ -402,7 +406,8 @@ mod tests {
     fn test_error_debug_has_variant_name() {
         assert!(format!("{:?}", Error::AlreadyTripped).contains("AlreadyTripped"));
         assert!(format!("{:?}", Error::NotTripped).contains("NotTripped"));
-        assert!(format!("{:?}", Error::UnauthorizedCaller(Address::ZERO)).contains("UnauthorizedCaller"));
+        assert!(format!("{:?}", Error::UnauthorizedCaller(Address::ZERO))
+            .contains("UnauthorizedCaller"));
         assert!(format!("{:?}", Error::InvalidOwner(Address::ZERO)).contains("InvalidOwner"));
     }
 }

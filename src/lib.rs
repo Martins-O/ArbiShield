@@ -40,9 +40,9 @@ pub mod circuit_breaker;
 pub mod alert_registry;
 
 // Re-export main contract types for convenience
-pub use detection_engine::storage::DetectionEngine;
-pub use circuit_breaker::storage::CircuitBreaker;
 pub use alert_registry::storage::AlertRegistry;
+pub use circuit_breaker::storage::CircuitBreaker;
+pub use detection_engine::storage::DetectionEngine;
 
 #[cfg(feature = "export-abi")]
 /// Export ABI for all contracts

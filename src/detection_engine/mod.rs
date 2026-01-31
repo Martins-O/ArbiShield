@@ -7,15 +7,17 @@ extern crate alloc;
 
 use alloc::vec::Vec;
 use alloy_primitives::{Address, U256};
-use stylus_sdk::{evm, msg};
 use stylus_sdk::prelude::*;
+use stylus_sdk::{evm, msg};
 
 pub mod error;
 pub mod interface;
 pub mod storage;
 
 use error::Error;
-use interface::{AnomalyDetected, IDetectionEngine, MetricRegistered, MetricReported, OwnershipTransferred};
+use interface::{
+    AnomalyDetected, IDetectionEngine, MetricRegistered, MetricReported, OwnershipTransferred,
+};
 use storage::DetectionEngine;
 
 // Implementation of the DetectionEngine contract
@@ -175,7 +177,7 @@ impl DetectionEngine {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use alloc::{vec, format};
+    use alloc::{format, vec};
 
     // ========================================
     // Threshold & Anomaly Detection Logic
@@ -199,7 +201,10 @@ mod tests {
     fn test_value_equal_threshold_is_normal() {
         let threshold = U256::from(100);
         let value = U256::from(100);
-        assert!(!(value > threshold), "Value equal to threshold is NOT anomaly (strict >)");
+        assert!(
+            !(value > threshold),
+            "Value equal to threshold is NOT anomaly (strict >)"
+        );
     }
 
     #[test]
@@ -213,7 +218,10 @@ mod tests {
     fn test_zero_threshold_any_value_is_anomaly() {
         let threshold = U256::ZERO;
         let value = U256::from(1);
-        assert!(value > threshold, "Any positive value exceeds zero threshold");
+        assert!(
+            value > threshold,
+            "Any positive value exceeds zero threshold"
+        );
     }
 
     #[test]
@@ -321,7 +329,11 @@ mod tests {
         let threshold = U256::from(100);
         let encoded: Vec<u8> = Error::ThresholdExceeded { current, threshold }.into();
         // selector(4) + uint256(32) + uint256(32)
-        assert_eq!(encoded.len(), 68, "Should encode both current and threshold");
+        assert_eq!(
+            encoded.len(),
+            68,
+            "Should encode both current and threshold"
+        );
     }
 
     #[test]
@@ -337,14 +349,19 @@ mod tests {
             Error::UnauthorizedCaller(Address::ZERO).into(),
             Error::MetricNotFound { id: U256::ZERO }.into(),
             Error::InvalidThreshold { value: U256::ZERO }.into(),
-            Error::ThresholdExceeded { current: U256::ZERO, threshold: U256::ZERO }.into(),
+            Error::ThresholdExceeded {
+                current: U256::ZERO,
+                threshold: U256::ZERO,
+            }
+            .into(),
             Error::InvalidOwner(Address::ZERO).into(),
         ];
 
         for i in 0..errors.len() {
             for j in (i + 1)..errors.len() {
                 assert_ne!(
-                    &errors[i][..4], &errors[j][..4],
+                    &errors[i][..4],
+                    &errors[j][..4],
                     "Error selectors at indices {i} and {j} must differ"
                 );
             }
@@ -378,7 +395,10 @@ mod tests {
             Error::UnauthorizedCaller(Address::ZERO),
             Error::MetricNotFound { id: U256::ZERO },
             Error::InvalidThreshold { value: U256::ZERO },
-            Error::ThresholdExceeded { current: U256::ZERO, threshold: U256::ZERO },
+            Error::ThresholdExceeded {
+                current: U256::ZERO,
+                threshold: U256::ZERO,
+            },
             Error::InvalidOwner(Address::ZERO),
         ];
         for err in errors {

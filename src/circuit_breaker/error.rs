@@ -38,12 +38,8 @@ impl From<Error> for Vec<u8> {
         match err {
             Error::AlreadyTripped => AlreadyTripped {}.abi_encode(),
             Error::NotTripped => NotTripped {}.abi_encode(),
-            Error::UnauthorizedCaller(caller) => {
-                UnauthorizedCaller { caller }.abi_encode()
-            }
-            Error::InvalidOwner(owner) => {
-                InvalidOwner { owner }.abi_encode()
-            }
+            Error::UnauthorizedCaller(caller) => UnauthorizedCaller { caller }.abi_encode(),
+            Error::InvalidOwner(owner) => InvalidOwner { owner }.abi_encode(),
         }
     }
 }

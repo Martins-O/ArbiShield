@@ -101,10 +101,7 @@ pub trait IAlertRegistry {
     ///
     /// # Returns
     /// Tuple of (timestamp, severity, source, message_hash)
-    fn get_alert(
-        &self,
-        id: U256,
-    ) -> Result<(U256, u8, Address, FixedBytes<32>), Self::Error>;
+    fn get_alert(&self, id: U256) -> Result<(U256, u8, Address, FixedBytes<32>), Self::Error>;
 
     /// Get the total number of registered alerts (V1)
     fn get_alert_count(&self) -> U256;
@@ -148,7 +145,19 @@ pub trait IAlertRegistry {
     fn get_enhanced_alert(
         &self,
         id: U256,
-    ) -> Result<(Address, U256, U256, U256, U256, bool, FixedBytes<32>, Address), Self::Error>;
+    ) -> Result<
+        (
+            Address,
+            U256,
+            U256,
+            U256,
+            U256,
+            bool,
+            FixedBytes<32>,
+            Address,
+        ),
+        Self::Error,
+    >;
 
     /// Get the total number of enhanced alerts
     fn get_enhanced_alert_count(&self) -> U256;

@@ -27,7 +27,7 @@ use proptest::prelude::*;
 // Simulate DetectionEngine state
 #[derive(Clone, Debug)]
 struct DetectionEngineState {
-    thresholds: Vec<(U256, U256)>, // (metric_id, threshold)
+    thresholds: Vec<(U256, U256)>,     // (metric_id, threshold)
     current_values: Vec<(U256, U256)>, // (metric_id, value)
     metric_count: U256,
 }
@@ -59,13 +59,15 @@ impl DetectionEngineState {
     }
 
     fn check_anomaly(&self, id: U256) -> Result<bool, &'static str> {
-        let value = self.current_values
+        let value = self
+            .current_values
             .iter()
             .find(|(mid, _)| *mid == id)
             .map(|(_, v)| *v)
             .ok_or("MetricNotFound")?;
 
-        let threshold = self.thresholds
+        let threshold = self
+            .thresholds
             .iter()
             .find(|(mid, _)| *mid == id)
             .map(|(_, t)| *t)
@@ -166,7 +168,9 @@ fn invariant_de2_same_value_same_threshold_same_result() {
     let mut de = DetectionEngineState::new();
 
     // Create multiple metrics with same threshold
-    let ids: Vec<U256> = (0..10).map(|_| de.register_metric(U256::from(500))).collect();
+    let ids: Vec<U256> = (0..10)
+        .map(|_| de.register_metric(U256::from(500)))
+        .collect();
 
     // Report same value to all metrics
     for &id in &ids {
@@ -228,7 +232,8 @@ fn invariant_de3_metric_count_never_decreases() {
 
         assert!(
             after > before,
-            "INV-DE-3 VIOLATED: Count didn't increase on registration {}", i
+            "INV-DE-3 VIOLATED: Count didn't increase on registration {}",
+            i
         );
         assert_eq!(
             after,
@@ -299,11 +304,11 @@ fn invariant_de4_boundary_conditions() {
 
     // Test various threshold boundaries
     let test_cases = vec![
-        (U256::ZERO, U256::ZERO, false),      // 0 == 0: not anomaly
-        (U256::ZERO, U256::from(1), true),    // 1 > 0: anomaly
+        (U256::ZERO, U256::ZERO, false),           // 0 == 0: not anomaly
+        (U256::ZERO, U256::from(1), true),         // 1 > 0: anomaly
         (U256::from(100), U256::from(100), false), // equal: not anomaly
         (U256::from(100), U256::from(101), true),  // just over: anomaly
-        (U256::MAX, U256::MAX, false),        // MAX == MAX: not anomaly
+        (U256::MAX, U256::MAX, false),             // MAX == MAX: not anomaly
     ];
 
     for (i, (threshold, value, expected_anomaly)) in test_cases.iter().enumerate() {
@@ -433,7 +438,8 @@ fn stress_test_1000_operations_maintain_all_invariants() {
         // INV-DE-3: Count unchanged by reports
         assert_eq!(
             de.metric_count, before_count,
-            "INV-DE-3 violated at op {}", i
+            "INV-DE-3 violated at op {}",
+            i
         );
 
         // INV-DE-4: Detection correctness
@@ -449,10 +455,7 @@ fn stress_test_1000_operations_maintain_all_invariants() {
 
         // INV-DE-2: Determinism
         let result2 = de.check_anomaly(id).unwrap();
-        assert_eq!(
-            is_anomaly, result2,
-            "INV-DE-2 violated at op {}", i
-        );
+        assert_eq!(is_anomaly, result2, "INV-DE-2 violated at op {}", i);
     }
 
     println!("✓ All DetectionEngine invariants held across 1000 operations");

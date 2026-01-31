@@ -9,8 +9,8 @@ extern crate alloc;
 
 use alloc::vec::Vec;
 use alloy_primitives::{Address, FixedBytes, U256};
-use stylus_sdk::{block, evm, msg};
 use stylus_sdk::prelude::*;
+use stylus_sdk::{block, evm, msg};
 
 pub mod error;
 pub mod interface;
@@ -18,16 +18,22 @@ pub mod storage;
 
 use error::Error;
 use interface::{
+    AlertAcknowledged,
+    AlertExpirationUpdated,
     // V1 events
-    AlertRegistered, OwnershipTransferred,
+    AlertRegistered,
+    CriticalAlertEmitted,
+    DetectionEngineUpdated,
     // V2 events
-    EnhancedAlertRegistered, AlertAcknowledged,
-    SubscriberAdded, SubscriberRemoved,
-    AlertExpirationUpdated, DetectionEngineUpdated,
-    RoleGranted, RoleRevoked,
-    HighThreatAlertEmitted, CriticalAlertEmitted,
+    EnhancedAlertRegistered,
+    HighThreatAlertEmitted,
     // Trait
     IAlertRegistry,
+    OwnershipTransferred,
+    RoleGranted,
+    RoleRevoked,
+    SubscriberAdded,
+    SubscriberRemoved,
 };
 use storage::AlertRegistry;
 
@@ -126,7 +132,8 @@ impl AlertRegistry {
 
     /// Initialize default configuration values
     fn initialize_defaults(&mut self) {
-        self.alert_expiration_duration.set(U256::from(DEFAULT_EXPIRATION));
+        self.alert_expiration_duration
+            .set(U256::from(DEFAULT_EXPIRATION));
     }
 
     /// Initialize ERC-165 supported interfaces
@@ -180,13 +187,8 @@ impl IAlertRegistry for AlertRegistry {
         Ok(alert_id)
     }
 
-    fn get_alert(
-        &self,
-        id: U256,
-    ) -> Result<(U256, u8, Address, FixedBytes<32>), Self::Error> {
-        let index: usize = id
-            .try_into()
-            .map_err(|_| Error::AlertNotFound { id })?;
+    fn get_alert(&self, id: U256) -> Result<(U256, u8, Address, FixedBytes<32>), Self::Error> {
+        let index: usize = id.try_into().map_err(|_| Error::AlertNotFound { id })?;
 
         if index >= self.alerts.len() {
             return Err(Error::AlertNotFound { id });
@@ -281,11 +283,15 @@ impl IAlertRegistry for AlertRegistry {
 
         // Update per-protocol alert count
         let proto_count = self.protocol_alert_count.get(protocol);
-        self.protocol_alert_count.setter(protocol).set(proto_count.saturating_add(U256::from(1)));
+        self.protocol_alert_count
+            .setter(protocol)
+            .set(proto_count.saturating_add(U256::from(1)));
 
         // Update priority-based count
         let prio_count = self.priority_alert_counts.get(priority_level);
-        self.priority_alert_counts.setter(priority_level).set(prio_count.saturating_add(U256::from(1)));
+        self.priority_alert_counts
+            .setter(priority_level)
+            .set(prio_count.saturating_add(U256::from(1)));
 
         // Emit enhanced alert event
         evm::log(EnhancedAlertRegistered {
@@ -322,7 +328,19 @@ impl IAlertRegistry for AlertRegistry {
     fn get_enhanced_alert(
         &self,
         id: U256,
-    ) -> Result<(Address, U256, U256, U256, U256, bool, FixedBytes<32>, Address), Self::Error> {
+    ) -> Result<
+        (
+            Address,
+            U256,
+            U256,
+            U256,
+            U256,
+            bool,
+            FixedBytes<32>,
+            Address,
+        ),
+        Self::Error,
+    > {
         // Check if alert exists (ID must be >= 1 and <= enhanced_alert_count)
         let count = self.enhanced_alert_count.get();
         if id.is_zero() || id > count {
@@ -339,7 +357,16 @@ impl IAlertRegistry for AlertRegistry {
         let message_hash = alert.message_hash.get();
         let source = alert.source.get();
 
-        Ok((protocol, threat_level, pattern_matched, timestamp, priority_level, acknowledged, message_hash, source))
+        Ok((
+            protocol,
+            threat_level,
+            pattern_matched,
+            timestamp,
+            priority_level,
+            acknowledged,
+            message_hash,
+            source,
+        ))
     }
 
     fn get_enhanced_alert_count(&self) -> U256 {
@@ -413,7 +440,8 @@ impl IAlertRegistry for AlertRegistry {
 
         self.subscribers.setter(addr).set(true);
         let count = self.subscriber_count.get();
-        self.subscriber_count.set(count.saturating_add(U256::from(1)));
+        self.subscriber_count
+            .set(count.saturating_add(U256::from(1)));
 
         evm::log(SubscriberAdded {
             subscriber: addr,
@@ -432,7 +460,8 @@ impl IAlertRegistry for AlertRegistry {
 
         self.subscribers.setter(addr).set(false);
         let count = self.subscriber_count.get();
-        self.subscriber_count.set(count.saturating_sub(U256::from(1)));
+        self.subscriber_count
+            .set(count.saturating_sub(U256::from(1)));
 
         evm::log(SubscriberRemoved {
             subscriber: addr,
@@ -629,8 +658,7 @@ impl AlertRegistry {
         source: Address,
         message_hash: FixedBytes<32>,
     ) -> Result<U256, Vec<u8>> {
-        IAlertRegistry::register_alert(self, severity, source, message_hash)
-            .map_err(|e| e.into())
+        IAlertRegistry::register_alert(self, severity, source, message_hash).map_err(|e| e.into())
     }
 
     /// Get alert by ID (V1)
@@ -664,15 +692,34 @@ impl AlertRegistry {
         message_hash: FixedBytes<32>,
         source: Address,
     ) -> Result<U256, Vec<u8>> {
-        IAlertRegistry::register_enhanced_alert(self, protocol, threat_level, pattern_matched, message_hash, source)
-            .map_err(|e| e.into())
+        IAlertRegistry::register_enhanced_alert(
+            self,
+            protocol,
+            threat_level,
+            pattern_matched,
+            message_hash,
+            source,
+        )
+        .map_err(|e| e.into())
     }
 
     /// Get enhanced alert details by ID
     pub fn get_enhanced_alert(
         &self,
         id: U256,
-    ) -> Result<(Address, U256, U256, U256, U256, bool, FixedBytes<32>, Address), Vec<u8>> {
+    ) -> Result<
+        (
+            Address,
+            U256,
+            U256,
+            U256,
+            U256,
+            bool,
+            FixedBytes<32>,
+            Address,
+        ),
+        Vec<u8>,
+    > {
         IAlertRegistry::get_enhanced_alert(self, id).map_err(|e| e.into())
     }
 
@@ -777,7 +824,7 @@ impl AlertRegistry {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use alloc::{vec, format};
+    use alloc::{format, vec};
 
     // --- Role Constants ---
 
@@ -1011,9 +1058,12 @@ mod tests {
 
         // Simulate registering alerts at different priorities
         counts[PRIORITY_LOW as usize] = counts[PRIORITY_LOW as usize].saturating_add(U256::from(1));
-        counts[PRIORITY_MEDIUM as usize] = counts[PRIORITY_MEDIUM as usize].saturating_add(U256::from(1));
-        counts[PRIORITY_HIGH as usize] = counts[PRIORITY_HIGH as usize].saturating_add(U256::from(1));
-        counts[PRIORITY_CRITICAL as usize] = counts[PRIORITY_CRITICAL as usize].saturating_add(U256::from(1));
+        counts[PRIORITY_MEDIUM as usize] =
+            counts[PRIORITY_MEDIUM as usize].saturating_add(U256::from(1));
+        counts[PRIORITY_HIGH as usize] =
+            counts[PRIORITY_HIGH as usize].saturating_add(U256::from(1));
+        counts[PRIORITY_CRITICAL as usize] =
+            counts[PRIORITY_CRITICAL as usize].saturating_add(U256::from(1));
 
         assert_eq!(counts[0], U256::from(1));
         assert_eq!(counts[1], U256::from(1));
@@ -1094,7 +1144,8 @@ mod tests {
         let encoded: Vec<u8> = Error::InsufficientRole {
             caller: Address::from([0xBB; 20]),
             required_role: ADMIN_ROLE,
-        }.into();
+        }
+        .into();
         // selector(4) + address(32) + uint8(32)
         assert_eq!(encoded.len(), 68);
     }
@@ -1116,7 +1167,8 @@ mod tests {
         let encoded: Vec<u8> = Error::NotAlertProtocol {
             caller: Address::from([0xDD; 20]),
             id: U256::from(5),
-        }.into();
+        }
+        .into();
         // selector(4) + address(32) + uint256(32)
         assert_eq!(encoded.len(), 68);
     }
@@ -1126,13 +1178,17 @@ mod tests {
         let encoded: Vec<u8> = Error::BatchSizeTooLarge {
             size: U256::from(200),
             max: U256::from(100),
-        }.into();
+        }
+        .into();
         assert_eq!(encoded.len(), 68);
     }
 
     #[test]
     fn test_invalid_expiration_duration_error_encoding() {
-        let encoded: Vec<u8> = Error::InvalidExpirationDuration { duration: U256::ZERO }.into();
+        let encoded: Vec<u8> = Error::InvalidExpirationDuration {
+            duration: U256::ZERO,
+        }
+        .into();
         assert_eq!(encoded.len(), 36);
     }
 
@@ -1150,24 +1206,40 @@ mod tests {
             Error::InvalidAlert.into(),
             Error::UnauthorizedCaller(Address::ZERO).into(),
             Error::InvalidOwner(Address::ZERO).into(),
-            Error::InsufficientRole { caller: Address::ZERO, required_role: 0 }.into(),
+            Error::InsufficientRole {
+                caller: Address::ZERO,
+                required_role: 0,
+            }
+            .into(),
             Error::InvalidRole(0).into(),
             Error::CannotRevokeOwnRole(Address::ZERO).into(),
             Error::AlreadySubscribed(Address::ZERO).into(),
             Error::NotSubscribed(Address::ZERO).into(),
             Error::InvalidSubscriber(Address::ZERO).into(),
             Error::AlertAlreadyAcknowledged { id: U256::ZERO }.into(),
-            Error::NotAlertProtocol { caller: Address::ZERO, id: U256::ZERO }.into(),
+            Error::NotAlertProtocol {
+                caller: Address::ZERO,
+                id: U256::ZERO,
+            }
+            .into(),
             Error::InvalidPriorityLevel { level: U256::ZERO }.into(),
-            Error::BatchSizeTooLarge { size: U256::ZERO, max: U256::ZERO }.into(),
-            Error::InvalidExpirationDuration { duration: U256::ZERO }.into(),
+            Error::BatchSizeTooLarge {
+                size: U256::ZERO,
+                max: U256::ZERO,
+            }
+            .into(),
+            Error::InvalidExpirationDuration {
+                duration: U256::ZERO,
+            }
+            .into(),
             Error::InvalidAddress(Address::ZERO).into(),
             Error::UnsupportedInterface(FixedBytes::<4>::ZERO).into(),
         ];
         for i in 0..errors.len() {
             for j in (i + 1)..errors.len() {
                 assert_ne!(
-                    &errors[i][..4], &errors[j][..4],
+                    &errors[i][..4],
+                    &errors[j][..4],
                     "Error selectors at indices {i} and {j} must be unique"
                 );
             }
@@ -1270,7 +1342,11 @@ mod tests {
     fn test_enhanced_alert_ids_are_1_indexed() {
         let mut count = U256::ZERO;
         let first_id = count.saturating_add(U256::from(1));
-        assert_eq!(first_id, U256::from(1), "First enhanced alert ID should be 1");
+        assert_eq!(
+            first_id,
+            U256::from(1),
+            "First enhanced alert ID should be 1"
+        );
     }
 
     #[test]
@@ -1300,7 +1376,10 @@ mod tests {
         let role = MONITOR_ROLE;
 
         let is_de = de_addr != Address::ZERO && caller == de_addr;
-        assert!(is_de && role == MONITOR_ROLE, "DetectionEngine should bypass MONITOR role check");
+        assert!(
+            is_de && role == MONITOR_ROLE,
+            "DetectionEngine should bypass MONITOR role check"
+        );
     }
 
     #[test]
@@ -1321,7 +1400,10 @@ mod tests {
     #[test]
     fn test_role_zero_is_invalid() {
         let role: u8 = 0;
-        assert!(role == 0 || (role & !ALL_ROLES) != 0, "Role 0 should be invalid");
+        assert!(
+            role == 0 || (role & !ALL_ROLES) != 0,
+            "Role 0 should be invalid"
+        );
     }
 
     #[test]
@@ -1348,23 +1430,37 @@ mod tests {
             Error::InvalidAlert,
             Error::UnauthorizedCaller(Address::ZERO),
             Error::InvalidOwner(Address::ZERO),
-            Error::InsufficientRole { caller: Address::ZERO, required_role: 0 },
+            Error::InsufficientRole {
+                caller: Address::ZERO,
+                required_role: 0,
+            },
             Error::InvalidRole(0),
             Error::CannotRevokeOwnRole(Address::ZERO),
             Error::AlreadySubscribed(Address::ZERO),
             Error::NotSubscribed(Address::ZERO),
             Error::InvalidSubscriber(Address::ZERO),
             Error::AlertAlreadyAcknowledged { id: U256::ZERO },
-            Error::NotAlertProtocol { caller: Address::ZERO, id: U256::ZERO },
+            Error::NotAlertProtocol {
+                caller: Address::ZERO,
+                id: U256::ZERO,
+            },
             Error::InvalidPriorityLevel { level: U256::ZERO },
-            Error::BatchSizeTooLarge { size: U256::ZERO, max: U256::ZERO },
-            Error::InvalidExpirationDuration { duration: U256::ZERO },
+            Error::BatchSizeTooLarge {
+                size: U256::ZERO,
+                max: U256::ZERO,
+            },
+            Error::InvalidExpirationDuration {
+                duration: U256::ZERO,
+            },
             Error::InvalidAddress(Address::ZERO),
             Error::UnsupportedInterface(FixedBytes::<4>::ZERO),
         ];
         for err in errors {
             let debug = format!("{err:?}");
-            assert!(!debug.is_empty(), "All error variants must have debug output");
+            assert!(
+                !debug.is_empty(),
+                "All error variants must have debug output"
+            );
         }
     }
 
