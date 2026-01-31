@@ -19,6 +19,7 @@ ethers = "2.0"
 eyre = "0.6"
 dotenv = "0.15"
 proptest = "1.4"
+criterion = { version = "0.5", features = ["html_reports"] }
 
 [features]
 default = ["mini-alloc"]
@@ -52,3 +53,7 @@ unsafe_code = "deny"
 all = "warn"
 correctness = "deny"
 pedantic = "warn"
+
+[[bench]]
+name = "gas_benchmarks"
+harness = false
