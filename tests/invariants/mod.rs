@@ -91,10 +91,10 @@
 //! decrease, attackers could hide evidence of repeated attacks.
 //! ```
 
-pub mod circuit_breaker_invariants;
-pub mod detection_engine_invariants;
 pub mod alert_registry_invariants;
+pub mod circuit_breaker_invariants;
 pub mod cross_contract_invariants;
+pub mod detection_engine_invariants;
 
 /// Run all invariant tests
 #[cfg(test)]

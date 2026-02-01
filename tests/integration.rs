@@ -11,9 +11,9 @@ use alloy_primitives::{Address, FixedBytes, U256};
 use alloy_sol_types::SolError;
 
 // Re-import error types from all contracts
+use arbishield::alert_registry::error::Error as ARError;
 use arbishield::circuit_breaker::error::Error as CBError;
 use arbishield::detection_engine::error::Error as DEError;
-use arbishield::alert_registry::error::Error as ARError;
 
 // Re-import the AlertRegistry for compute_priority
 use arbishield::alert_registry::storage::AlertRegistry;
@@ -91,38 +91,123 @@ fn test_all_cross_contract_error_selectors_globally_unique() {
     let cb_errors: Vec<(Vec<u8>, &str)> = vec![
         (CBError::AlreadyTripped.into(), "CB::AlreadyTripped"),
         (CBError::NotTripped.into(), "CB::NotTripped"),
-        (CBError::UnauthorizedCaller(Address::ZERO).into(), "CB::UnauthorizedCaller"),
-        (CBError::InvalidOwner(Address::ZERO).into(), "CB::InvalidOwner"),
+        (
+            CBError::UnauthorizedCaller(Address::ZERO).into(),
+            "CB::UnauthorizedCaller",
+        ),
+        (
+            CBError::InvalidOwner(Address::ZERO).into(),
+            "CB::InvalidOwner",
+        ),
     ];
 
     // DetectionEngine errors
     let de_errors: Vec<(Vec<u8>, &str)> = vec![
-        (DEError::UnauthorizedCaller(Address::ZERO).into(), "DE::UnauthorizedCaller"),
-        (DEError::MetricNotFound { id: U256::ZERO }.into(), "DE::MetricNotFound"),
-        (DEError::InvalidThreshold { value: U256::ZERO }.into(), "DE::InvalidThreshold"),
-        (DEError::ThresholdExceeded { current: U256::ZERO, threshold: U256::ZERO }.into(), "DE::ThresholdExceeded"),
-        (DEError::InvalidOwner(Address::ZERO).into(), "DE::InvalidOwner"),
+        (
+            DEError::UnauthorizedCaller(Address::ZERO).into(),
+            "DE::UnauthorizedCaller",
+        ),
+        (
+            DEError::MetricNotFound { id: U256::ZERO }.into(),
+            "DE::MetricNotFound",
+        ),
+        (
+            DEError::InvalidThreshold { value: U256::ZERO }.into(),
+            "DE::InvalidThreshold",
+        ),
+        (
+            DEError::ThresholdExceeded {
+                current: U256::ZERO,
+                threshold: U256::ZERO,
+            }
+            .into(),
+            "DE::ThresholdExceeded",
+        ),
+        (
+            DEError::InvalidOwner(Address::ZERO).into(),
+            "DE::InvalidOwner",
+        ),
     ];
 
     // AlertRegistry errors
     let ar_errors: Vec<(Vec<u8>, &str)> = vec![
-        (ARError::AlertNotFound { id: U256::ZERO }.into(), "AR::AlertNotFound"),
+        (
+            ARError::AlertNotFound { id: U256::ZERO }.into(),
+            "AR::AlertNotFound",
+        ),
         (ARError::InvalidAlert.into(), "AR::InvalidAlert"),
-        (ARError::UnauthorizedCaller(Address::ZERO).into(), "AR::UnauthorizedCaller"),
-        (ARError::InvalidOwner(Address::ZERO).into(), "AR::InvalidOwner"),
-        (ARError::InsufficientRole { caller: Address::ZERO, required_role: 0 }.into(), "AR::InsufficientRole"),
+        (
+            ARError::UnauthorizedCaller(Address::ZERO).into(),
+            "AR::UnauthorizedCaller",
+        ),
+        (
+            ARError::InvalidOwner(Address::ZERO).into(),
+            "AR::InvalidOwner",
+        ),
+        (
+            ARError::InsufficientRole {
+                caller: Address::ZERO,
+                required_role: 0,
+            }
+            .into(),
+            "AR::InsufficientRole",
+        ),
         (ARError::InvalidRole(0).into(), "AR::InvalidRole"),
-        (ARError::CannotRevokeOwnRole(Address::ZERO).into(), "AR::CannotRevokeOwnRole"),
-        (ARError::AlreadySubscribed(Address::ZERO).into(), "AR::AlreadySubscribed"),
-        (ARError::NotSubscribed(Address::ZERO).into(), "AR::NotSubscribed"),
-        (ARError::InvalidSubscriber(Address::ZERO).into(), "AR::InvalidSubscriber"),
-        (ARError::AlertAlreadyAcknowledged { id: U256::ZERO }.into(), "AR::AlertAlreadyAcknowledged"),
-        (ARError::NotAlertProtocol { caller: Address::ZERO, id: U256::ZERO }.into(), "AR::NotAlertProtocol"),
-        (ARError::InvalidPriorityLevel { level: U256::ZERO }.into(), "AR::InvalidPriorityLevel"),
-        (ARError::BatchSizeTooLarge { size: U256::ZERO, max: U256::ZERO }.into(), "AR::BatchSizeTooLarge"),
-        (ARError::InvalidExpirationDuration { duration: U256::ZERO }.into(), "AR::InvalidExpirationDuration"),
-        (ARError::InvalidAddress(Address::ZERO).into(), "AR::InvalidAddress"),
-        (ARError::UnsupportedInterface(FixedBytes::<4>::ZERO).into(), "AR::UnsupportedInterface"),
+        (
+            ARError::CannotRevokeOwnRole(Address::ZERO).into(),
+            "AR::CannotRevokeOwnRole",
+        ),
+        (
+            ARError::AlreadySubscribed(Address::ZERO).into(),
+            "AR::AlreadySubscribed",
+        ),
+        (
+            ARError::NotSubscribed(Address::ZERO).into(),
+            "AR::NotSubscribed",
+        ),
+        (
+            ARError::InvalidSubscriber(Address::ZERO).into(),
+            "AR::InvalidSubscriber",
+        ),
+        (
+            ARError::AlertAlreadyAcknowledged { id: U256::ZERO }.into(),
+            "AR::AlertAlreadyAcknowledged",
+        ),
+        (
+            ARError::NotAlertProtocol {
+                caller: Address::ZERO,
+                id: U256::ZERO,
+            }
+            .into(),
+            "AR::NotAlertProtocol",
+        ),
+        (
+            ARError::InvalidPriorityLevel { level: U256::ZERO }.into(),
+            "AR::InvalidPriorityLevel",
+        ),
+        (
+            ARError::BatchSizeTooLarge {
+                size: U256::ZERO,
+                max: U256::ZERO,
+            }
+            .into(),
+            "AR::BatchSizeTooLarge",
+        ),
+        (
+            ARError::InvalidExpirationDuration {
+                duration: U256::ZERO,
+            }
+            .into(),
+            "AR::InvalidExpirationDuration",
+        ),
+        (
+            ARError::InvalidAddress(Address::ZERO).into(),
+            "AR::InvalidAddress",
+        ),
+        (
+            ARError::UnsupportedInterface(FixedBytes::<4>::ZERO).into(),
+            "AR::UnsupportedInterface",
+        ),
     ];
 
     all_selectors.extend(cb_errors);
@@ -161,8 +246,16 @@ fn test_shared_unauthorized_caller_selector() {
     let de: Vec<u8> = DEError::UnauthorizedCaller(Address::ZERO).into();
     let ar: Vec<u8> = ARError::UnauthorizedCaller(Address::ZERO).into();
 
-    assert_eq!(&cb[..4], &de[..4], "CB and DE UnauthorizedCaller selectors must match");
-    assert_eq!(&de[..4], &ar[..4], "DE and AR UnauthorizedCaller selectors must match");
+    assert_eq!(
+        &cb[..4],
+        &de[..4],
+        "CB and DE UnauthorizedCaller selectors must match"
+    );
+    assert_eq!(
+        &de[..4],
+        &ar[..4],
+        "DE and AR UnauthorizedCaller selectors must match"
+    );
 }
 
 #[test]
@@ -201,11 +294,17 @@ fn test_flash_loan_detection_scenario() {
     let threshold = U256::from(5_000_000u64); // 5x normal as threshold
 
     // Step 1: Normal operation - no anomaly
-    assert!(!(normal_value > threshold), "Normal value should not trigger");
+    assert!(
+        !(normal_value > threshold),
+        "Normal value should not trigger"
+    );
 
     // Step 2: Flash loan attack - value spikes to 10x
     let attack_value = U256::from(10_000_000u64);
-    assert!(attack_value > threshold, "Flash loan spike should trigger anomaly");
+    assert!(
+        attack_value > threshold,
+        "Flash loan spike should trigger anomaly"
+    );
 
     // Step 3: CircuitBreaker would be tripped
     let mut is_tripped = false;
@@ -216,7 +315,11 @@ fn test_flash_loan_detection_scenario() {
     // Priority should be CRITICAL for a flash loan attack
     let threat_level = U256::from(95u64);
     let priority = AlertRegistry::compute_priority(threat_level);
-    assert_eq!(priority, U256::from(3u64), "Flash loan attack should be CRITICAL priority");
+    assert_eq!(
+        priority,
+        U256::from(3u64),
+        "Flash loan attack should be CRITICAL priority"
+    );
 
     // Step 5: After investigation, circuit is reset
     is_tripped = false;
@@ -235,12 +338,19 @@ fn test_price_manipulation_detection_scenario() {
 
     // Sudden manipulation - price doubles
     let manipulated_price = U256::from(4_000u64);
-    assert!(manipulated_price > threshold, "Manipulated price should trigger");
+    assert!(
+        manipulated_price > threshold,
+        "Manipulated price should trigger"
+    );
 
     // Alert with high threat
     let threat = U256::from(85u64);
     let priority = AlertRegistry::compute_priority(threat);
-    assert_eq!(priority, U256::from(2u64), "Price manipulation should be HIGH priority");
+    assert_eq!(
+        priority,
+        U256::from(2u64),
+        "Price manipulation should be HIGH priority"
+    );
 }
 
 #[test]
@@ -253,7 +363,10 @@ fn test_reentrancy_detection_scenario() {
     let attack_calls = U256::from(50u64);
 
     assert!(!(normal_calls > call_count_threshold));
-    assert!(attack_calls > call_count_threshold, "Reentrancy pattern detected");
+    assert!(
+        attack_calls > call_count_threshold,
+        "Reentrancy pattern detected"
+    );
 
     // Critical threat level for reentrancy
     let threat = U256::from(99u64);
@@ -309,10 +422,10 @@ fn test_multi_protocol_priority_distribution() {
 
     // Simulate alerts at various threat levels for multiple protocols
     let threat_levels: Vec<u64> = vec![
-        10, 25, 35,     // LOW (3)
-        40, 55, 65,     // MEDIUM (3)
-        70, 80, 85,     // HIGH (3)
-        90, 95, 100,    // CRITICAL (3)
+        10, 25, 35, // LOW (3)
+        40, 55, 65, // MEDIUM (3)
+        70, 80, 85, // HIGH (3)
+        90, 95, 100, // CRITICAL (3)
     ];
 
     for level in &threat_levels {
@@ -361,7 +474,9 @@ fn test_full_alert_lifecycle() {
     // Step 6: Check expiration
     let created_at = U256::from(1_700_000_000u64);
     let expiration_duration = U256::from(2_592_000u64); // 30 days
-    let now = created_at.saturating_add(expiration_duration).saturating_add(U256::from(1));
+    let now = created_at
+        .saturating_add(expiration_duration)
+        .saturating_add(U256::from(1));
     let elapsed = now.saturating_sub(created_at);
     assert!(elapsed > expiration_duration, "Alert should be expired");
 
@@ -442,11 +557,8 @@ fn test_rbac_role_inheritance_simulation() {
     let nobody = Address::from([0x04; 20]);
 
     // Simulate role storage
-    let mut role_map: Vec<(Address, u8)> = vec![
-        (admin_user, admin),
-        (monitor_user, monitor),
-        (nobody, 0),
-    ];
+    let mut role_map: Vec<(Address, u8)> =
+        vec![(admin_user, admin), (monitor_user, monitor), (nobody, 0)];
 
     // Check: owner always has any role
     let owner_has_admin = true; // Owner implicitly has all roles
@@ -491,7 +603,10 @@ fn test_storage_layout_v1_fields_first() {
         bytes[12..32].copy_from_slice(owner.as_slice());
         bytes
     });
-    assert!(owner_u256 > U256::ZERO, "Owner address encodes to non-zero U256");
+    assert!(
+        owner_u256 > U256::ZERO,
+        "Owner address encodes to non-zero U256"
+    );
 }
 
 #[test]
@@ -564,10 +679,7 @@ fn test_concurrent_metric_reporting() {
         values.push((U256::from(i), U256::from(i * 20)));
     }
 
-    let anomalies: Vec<&(U256, U256)> = values
-        .iter()
-        .filter(|(_, v)| *v > threshold)
-        .collect();
+    let anomalies: Vec<&(U256, U256)> = values.iter().filter(|(_, v)| *v > threshold).collect();
 
     // Metrics 6-10 have values 120, 140, 160, 180, 200 - all > 100
     assert_eq!(anomalies.len(), 5, "5 metrics should exceed threshold");
@@ -597,15 +709,20 @@ fn test_concurrent_alert_registration() {
 
 #[test]
 fn test_address_generation_uniqueness() {
-    let addresses: Vec<Address> = (0..10u8)
-        .map(|i| Address::from([i + 1; 20]))
-        .collect();
+    let addresses: Vec<Address> = (0..10u8).map(|i| Address::from([i + 1; 20])).collect();
 
     for i in 0..addresses.len() {
         for j in (i + 1)..addresses.len() {
-            assert_ne!(addresses[i], addresses[j], "All generated addresses must be unique");
+            assert_ne!(
+                addresses[i], addresses[j],
+                "All generated addresses must be unique"
+            );
         }
-        assert_ne!(addresses[i], Address::ZERO, "No generated address should be zero");
+        assert_ne!(
+            addresses[i],
+            Address::ZERO,
+            "No generated address should be zero"
+        );
     }
 }
 
@@ -871,7 +988,10 @@ fn test_all_contract_errors_are_debuggable() {
         DEError::UnauthorizedCaller(Address::ZERO),
         DEError::MetricNotFound { id: U256::ZERO },
         DEError::InvalidThreshold { value: U256::ZERO },
-        DEError::ThresholdExceeded { current: U256::ZERO, threshold: U256::ZERO },
+        DEError::ThresholdExceeded {
+            current: U256::ZERO,
+            threshold: U256::ZERO,
+        },
         DEError::InvalidOwner(Address::ZERO),
     ];
     for err in &de_errors {
@@ -884,17 +1004,28 @@ fn test_all_contract_errors_are_debuggable() {
         ARError::InvalidAlert,
         ARError::UnauthorizedCaller(Address::ZERO),
         ARError::InvalidOwner(Address::ZERO),
-        ARError::InsufficientRole { caller: Address::ZERO, required_role: 0 },
+        ARError::InsufficientRole {
+            caller: Address::ZERO,
+            required_role: 0,
+        },
         ARError::InvalidRole(0),
         ARError::CannotRevokeOwnRole(Address::ZERO),
         ARError::AlreadySubscribed(Address::ZERO),
         ARError::NotSubscribed(Address::ZERO),
         ARError::InvalidSubscriber(Address::ZERO),
         ARError::AlertAlreadyAcknowledged { id: U256::ZERO },
-        ARError::NotAlertProtocol { caller: Address::ZERO, id: U256::ZERO },
+        ARError::NotAlertProtocol {
+            caller: Address::ZERO,
+            id: U256::ZERO,
+        },
         ARError::InvalidPriorityLevel { level: U256::ZERO },
-        ARError::BatchSizeTooLarge { size: U256::ZERO, max: U256::ZERO },
-        ARError::InvalidExpirationDuration { duration: U256::ZERO },
+        ARError::BatchSizeTooLarge {
+            size: U256::ZERO,
+            max: U256::ZERO,
+        },
+        ARError::InvalidExpirationDuration {
+            duration: U256::ZERO,
+        },
         ARError::InvalidAddress(Address::ZERO),
         ARError::UnsupportedInterface(FixedBytes::<4>::ZERO),
     ];
@@ -918,23 +1049,42 @@ fn test_all_error_encodings_have_minimum_selector() {
         DEError::UnauthorizedCaller(Address::ZERO).into(),
         DEError::MetricNotFound { id: U256::ZERO }.into(),
         DEError::InvalidThreshold { value: U256::ZERO }.into(),
-        DEError::ThresholdExceeded { current: U256::ZERO, threshold: U256::ZERO }.into(),
+        DEError::ThresholdExceeded {
+            current: U256::ZERO,
+            threshold: U256::ZERO,
+        }
+        .into(),
         DEError::InvalidOwner(Address::ZERO).into(),
         ARError::AlertNotFound { id: U256::ZERO }.into(),
         ARError::InvalidAlert.into(),
         ARError::UnauthorizedCaller(Address::ZERO).into(),
         ARError::InvalidOwner(Address::ZERO).into(),
-        ARError::InsufficientRole { caller: Address::ZERO, required_role: 0 }.into(),
+        ARError::InsufficientRole {
+            caller: Address::ZERO,
+            required_role: 0,
+        }
+        .into(),
         ARError::InvalidRole(0).into(),
         ARError::CannotRevokeOwnRole(Address::ZERO).into(),
         ARError::AlreadySubscribed(Address::ZERO).into(),
         ARError::NotSubscribed(Address::ZERO).into(),
         ARError::InvalidSubscriber(Address::ZERO).into(),
         ARError::AlertAlreadyAcknowledged { id: U256::ZERO }.into(),
-        ARError::NotAlertProtocol { caller: Address::ZERO, id: U256::ZERO }.into(),
+        ARError::NotAlertProtocol {
+            caller: Address::ZERO,
+            id: U256::ZERO,
+        }
+        .into(),
         ARError::InvalidPriorityLevel { level: U256::ZERO }.into(),
-        ARError::BatchSizeTooLarge { size: U256::ZERO, max: U256::ZERO }.into(),
-        ARError::InvalidExpirationDuration { duration: U256::ZERO }.into(),
+        ARError::BatchSizeTooLarge {
+            size: U256::ZERO,
+            max: U256::ZERO,
+        }
+        .into(),
+        ARError::InvalidExpirationDuration {
+            duration: U256::ZERO,
+        }
+        .into(),
         ARError::InvalidAddress(Address::ZERO).into(),
         ARError::UnsupportedInterface(FixedBytes::<4>::ZERO).into(),
     ];

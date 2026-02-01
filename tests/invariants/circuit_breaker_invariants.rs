@@ -222,10 +222,7 @@ fn invariant_cb3_reset_after_reset_fails() {
 
     // Second reset should fail
     let result = cb.reset();
-    assert!(
-        result.is_err(),
-        "INV-CB-3 VIOLATED: Second reset succeeded"
-    );
+    assert!(result.is_err(), "INV-CB-3 VIOLATED: Second reset succeeded");
     assert_eq!(result.unwrap_err(), "NotTripped");
 }
 
@@ -272,18 +269,14 @@ fn invariant_cb4_trip_count_accumulates_correctly() {
 
     for i in 1..=10 {
         cb.trip(U256::from(i * 1000)).unwrap();
-        assert_eq!(
-            cb.trip_count,
-            U256::from(i),
-            "Trip count should be {}",
-            i
-        );
+        assert_eq!(cb.trip_count, U256::from(i), "Trip count should be {}", i);
 
         cb.reset().unwrap();
         assert_eq!(
             cb.trip_count,
             U256::from(i),
-            "INV-CB-4 VIOLATED: Count changed after reset {}", i
+            "INV-CB-4 VIOLATED: Count changed after reset {}",
+            i
         );
     }
 
@@ -458,28 +451,35 @@ fn stress_test_1000_random_operations_maintain_invariants() {
         // Check ALL invariants after EVERY operation
         assert!(
             cb.trip_count >= before_count,
-            "INV-CB-1 violated at op {}", i
+            "INV-CB-1 violated at op {}",
+            i
         );
         assert!(
             cb.last_trip_time >= before_time,
-            "INV-CB-5 violated at op {}", i
+            "INV-CB-5 violated at op {}",
+            i
         );
 
         // State machine invariants
         if cb.is_tripped {
             assert!(
                 cb.trip(U256::from(i * 1000 + 500)).is_err(),
-                "INV-CB-2 violated at op {}", i
+                "INV-CB-2 violated at op {}",
+                i
             );
         } else {
-            assert!(
-                cb.reset().is_err(),
-                "INV-CB-3 violated at op {}", i
-            );
+            assert!(cb.reset().is_err(), "INV-CB-3 violated at op {}", i);
         }
     }
 
     println!("✓ All invariants held across 1000 operations");
     println!("  Final trip count: {}", cb.trip_count);
-    println!("  Final state: {}", if cb.is_tripped { "tripped" } else { "not tripped" });
+    println!(
+        "  Final state: {}",
+        if cb.is_tripped {
+            "tripped"
+        } else {
+            "not tripped"
+        }
+    );
 }

@@ -71,8 +71,8 @@ impl MockCircuitBreaker {
 #[derive(Debug, Clone)]
 struct MockDetectionEngine {
     owner: Address,
-    thresholds: Vec<(U256, U256)>,      // (metric_id, threshold)
-    current_values: Vec<(U256, U256)>,  // (metric_id, value)
+    thresholds: Vec<(U256, U256)>,     // (metric_id, threshold)
+    current_values: Vec<(U256, U256)>, // (metric_id, value)
     metric_count: U256,
 }
 
@@ -88,7 +88,9 @@ impl MockDetectionEngine {
 
     fn configure_threshold(&mut self, id: U256, threshold: U256) {
         // Update or insert threshold
-        if let Some((_, existing_threshold)) = self.thresholds.iter_mut().find(|(mid, _)| *mid == id) {
+        if let Some((_, existing_threshold)) =
+            self.thresholds.iter_mut().find(|(mid, _)| *mid == id)
+        {
             *existing_threshold = threshold;
         } else {
             self.thresholds.push((id, threshold));
@@ -98,7 +100,9 @@ impl MockDetectionEngine {
 
     fn report_metric(&mut self, id: U256, value: U256) {
         // Update or insert current value
-        if let Some((_, existing_value)) = self.current_values.iter_mut().find(|(mid, _)| *mid == id) {
+        if let Some((_, existing_value)) =
+            self.current_values.iter_mut().find(|(mid, _)| *mid == id)
+        {
             *existing_value = value;
         } else {
             self.current_values.push((id, value));
@@ -106,12 +110,16 @@ impl MockDetectionEngine {
     }
 
     fn check_anomaly(&self, id: U256) -> bool {
-        let threshold = self.thresholds.iter()
+        let threshold = self
+            .thresholds
+            .iter()
             .find(|(mid, _)| *mid == id)
             .map(|(_, t)| *t)
             .unwrap_or(U256::ZERO);
 
-        let current = self.current_values.iter()
+        let current = self
+            .current_values
+            .iter()
             .find(|(mid, _)| *mid == id)
             .map(|(_, v)| *v)
             .unwrap_or(U256::ZERO);
@@ -120,12 +128,16 @@ impl MockDetectionEngine {
     }
 
     fn analyze_threat_level(&self, id: U256) -> U256 {
-        let threshold = self.thresholds.iter()
+        let threshold = self
+            .thresholds
+            .iter()
             .find(|(mid, _)| *mid == id)
             .map(|(_, t)| *t)
             .unwrap_or(U256::ZERO);
 
-        let current = self.current_values.iter()
+        let current = self
+            .current_values
+            .iter()
             .find(|(mid, _)| *mid == id)
             .map(|(_, v)| *v)
             .unwrap_or(U256::ZERO);
@@ -140,7 +152,9 @@ impl MockDetectionEngine {
 
         // Calculate percentage above threshold (capped at 100)
         let excess = current.saturating_sub(threshold);
-        let percentage = excess.saturating_mul(U256::from(100)).saturating_div(threshold);
+        let percentage = excess
+            .saturating_mul(U256::from(100))
+            .saturating_div(threshold);
 
         if percentage > U256::from(100) {
             U256::from(100)
@@ -170,13 +184,20 @@ impl MockAlertRegistry {
         }
     }
 
-    fn register_enhanced_alert(&mut self, _protocol: Address, threat_level: U256, _pattern: U256, _timestamp: U256) -> U256 {
+    fn register_enhanced_alert(
+        &mut self,
+        _protocol: Address,
+        threat_level: U256,
+        _pattern: U256,
+        _timestamp: U256,
+    ) -> U256 {
         self.enhanced_alert_count = self.enhanced_alert_count.saturating_add(U256::from(1));
         let alert_id = self.enhanced_alert_count;
 
         // Compute priority
         let priority = self.compute_priority(threat_level);
-        self.priority_counts[priority as usize] = self.priority_counts[priority as usize].saturating_add(U256::from(1));
+        self.priority_counts[priority as usize] =
+            self.priority_counts[priority as usize].saturating_add(U256::from(1));
 
         alert_id
     }
@@ -196,7 +217,8 @@ impl MockAlertRegistry {
     }
 
     fn has_role(&self, account: Address, role: u8) -> bool {
-        self.roles.iter()
+        self.roles
+            .iter()
             .find(|(addr, _)| *addr == account)
             .map(|(_, r)| (*r & role) != 0)
             .unwrap_or(false)
@@ -550,22 +572,18 @@ fn gas_measurement_storage_scalability() {
     let owner = Address::repeat_byte(0x01);
 
     for count in [1, 5, 10, 20, 50, 100] {
-        let measurement = measure_operation(
-            &format!("Register {} Alerts", count),
-            100,
-            || {
-                let mut ar = MockAlertRegistry::new(owner);
+        let measurement = measure_operation(&format!("Register {} Alerts", count), 100, || {
+            let mut ar = MockAlertRegistry::new(owner);
 
-                for i in 0..count {
-                    let protocol = Address::repeat_byte((i % 256) as u8);
-                    let threat_level = U256::from(50_u64 + (i as u64 % 50));
-                    let pattern = U256::from(0x01_u64);
-                    let timestamp = U256::from(1234567890_u64);
+            for i in 0..count {
+                let protocol = Address::repeat_byte((i % 256) as u8);
+                let threat_level = U256::from(50_u64 + (i as u64 % 50));
+                let pattern = U256::from(0x01_u64);
+                let timestamp = U256::from(1234567890_u64);
 
-                    ar.register_enhanced_alert(protocol, threat_level, pattern, timestamp);
-                }
-            },
-        );
+                ar.register_enhanced_alert(protocol, threat_level, pattern, timestamp);
+            }
+        });
 
         println!("{} alerts: {} ns (avg)", count, measurement.avg_time_ns);
     }
@@ -583,7 +601,10 @@ fn gas_measurement_comprehensive_summary() {
     println!("COMPREHENSIVE GAS MEASUREMENT SUMMARY");
     println!("{}", "=".repeat(80));
 
-    println!("\n{:<40} {:<15} {:<15}", "Operation", "Iterations", "Avg Time (ns)");
+    println!(
+        "\n{:<40} {:<15} {:<15}",
+        "Operation", "Iterations", "Avg Time (ns)"
+    );
     println!("{}", "-".repeat(80));
 
     // Helper macro to measure and print
@@ -658,7 +679,9 @@ fn gas_measurement_comprehensive_summary() {
     });
 
     println!("{}", "=".repeat(80));
-    println!("\nNote: These are computational complexity measurements, not actual on-chain gas costs.");
+    println!(
+        "\nNote: These are computational complexity measurements, not actual on-chain gas costs."
+    );
     println!("For actual gas costs, deploy to Arbitrum Sepolia and use gas profiling tools.");
     println!("{}", "=".repeat(80));
 }

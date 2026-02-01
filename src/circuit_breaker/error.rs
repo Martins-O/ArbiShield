@@ -158,76 +158,8 @@ impl From<Error> for Vec<u8> {
             // Existing errors
             Error::AlreadyTripped => AlreadyTripped {}.abi_encode(),
             Error::NotTripped => NotTripped {}.abi_encode(),
-            Error::UnauthorizedCaller(caller) => {
-                UnauthorizedCaller { caller }.abi_encode()
-            }
-            Error::InvalidOwner(owner) => {
-                InvalidOwner { owner }.abi_encode()
-            }
-
-            // Protocol management errors
-            Error::ProtocolNotRegistered(protocol) => {
-                ProtocolNotRegistered { protocol }.abi_encode()
-            }
-            Error::ProtocolAlreadyRegistered(protocol) => {
-                ProtocolAlreadyRegistered { protocol }.abi_encode()
-            }
-            Error::InvalidProtocol(protocol) => {
-                InvalidProtocol { protocol }.abi_encode()
-            }
-
-            // Role management errors
-            Error::InsufficientRole { caller, required_role } => {
-                InsufficientRole {
-                    caller,
-                    required_role,
-                }.abi_encode()
-            }
-            Error::InvalidRole(role) => {
-                InvalidRole { role }.abi_encode()
-            }
-            Error::CannotRevokeOwnRole(caller) => {
-                CannotRevokeOwnRole { caller }.abi_encode()
-            }
-
-            // Time lock errors
-            Error::MinimumPauseDurationNotMet { elapsed, required } => {
-                MinimumPauseDurationNotMet { elapsed, required }.abi_encode()
-            }
-            Error::CooldownPeriodActive { remaining } => {
-                CooldownPeriodActive { remaining }.abi_encode()
-            }
-            Error::InvalidDuration(duration) => {
-                InvalidDuration { duration }.abi_encode()
-            }
-            Error::MaxPauseDurationExceeded { duration, max } => {
-                MaxPauseDurationExceeded { duration, max }.abi_encode()
-            }
-
-            // Operational errors
-            Error::ProtocolAlreadyPaused(protocol) => {
-                ProtocolAlreadyPaused { protocol }.abi_encode()
-            }
-            Error::ProtocolNotPaused(protocol) => {
-                ProtocolNotPaused { protocol }.abi_encode()
-            }
-            Error::GlobalCircuitActive => {
-                GlobalCircuitActive {}.abi_encode()
-            }
-            Error::EmptyProtocolList => {
-                EmptyProtocolList {}.abi_encode()
-            }
-            Error::BatchSizeTooLarge { size, max } => {
-                BatchSizeTooLarge { size, max }.abi_encode()
-            }
-            Error::IndexOutOfBounds { index, length } => {
-                IndexOutOfBounds { index, length }.abi_encode()
-            }
-
-            // ERC-165 errors
-            Error::UnsupportedInterface(interface_id) => {
-                UnsupportedInterface { interface_id }.abi_encode()
-            }
+            Error::UnauthorizedCaller(caller) => UnauthorizedCaller { caller }.abi_encode(),
+            Error::InvalidOwner(owner) => InvalidOwner { owner }.abi_encode(),
         }
     }
 }

@@ -33,13 +33,13 @@
 extern crate alloc;
 
 use alloc::vec::Vec;
-use alloy_primitives::{Address, U256, FixedBytes};
+use alloy_primitives::{Address, FixedBytes, U256};
 use alloy_sol_types::SolError;
 
 // Import error types for testing error encoding
+use arbishield::alert_registry::error::Error as ARError;
 use arbishield::circuit_breaker::error::Error as CBError;
 use arbishield::detection_engine::error::Error as DEError;
-use arbishield::alert_registry::error::Error as ARError;
 
 // Import AlertRegistry for testing pure functions like compute_priority
 use arbishield::alert_registry::storage::AlertRegistry;
@@ -105,7 +105,11 @@ impl MockCircuitBreaker {
         Ok(())
     }
 
-    fn transfer_ownership(&mut self, caller: Address, new_owner: Address) -> Result<(), &'static str> {
+    fn transfer_ownership(
+        &mut self,
+        caller: Address,
+        new_owner: Address,
+    ) -> Result<(), &'static str> {
         if caller != self.owner {
             return Err("UnauthorizedCaller");
         }
@@ -123,7 +127,7 @@ impl MockCircuitBreaker {
 /// Simulated DetectionEngine state for security testing
 #[derive(Clone, Debug)]
 struct MockDetectionEngine {
-    thresholds: Vec<(U256, U256)>, // (id, threshold) pairs
+    thresholds: Vec<(U256, U256)>,     // (id, threshold) pairs
     current_values: Vec<(U256, U256)>, // (id, value) pairs
     metric_count: U256,
     owner: Address,
@@ -139,7 +143,12 @@ impl MockDetectionEngine {
         }
     }
 
-    fn register_metric(&mut self, caller: Address, id: U256, threshold: U256) -> Result<(), &'static str> {
+    fn register_metric(
+        &mut self,
+        caller: Address,
+        id: U256,
+        threshold: U256,
+    ) -> Result<(), &'static str> {
         if caller != self.owner {
             return Err("UnauthorizedCaller");
         }
@@ -153,7 +162,9 @@ impl MockDetectionEngine {
 
     fn report_metric(&mut self, id: U256, value: U256) -> Result<(), &'static str> {
         // Update or insert current value
-        if let Some((_, existing_value)) = self.current_values.iter_mut().find(|(vid, _)| *vid == id) {
+        if let Some((_, existing_value)) =
+            self.current_values.iter_mut().find(|(vid, _)| *vid == id)
+        {
             *existing_value = value;
         } else {
             self.current_values.push((id, value));
@@ -164,12 +175,16 @@ impl MockDetectionEngine {
     }
 
     fn check_anomaly(&self, id: U256) -> Result<bool, &'static str> {
-        let threshold = self.thresholds.iter()
+        let threshold = self
+            .thresholds
+            .iter()
             .find(|(tid, _)| *tid == id)
             .map(|(_, t)| *t)
             .unwrap_or(U256::ZERO);
 
-        let current = self.current_values.iter()
+        let current = self
+            .current_values
+            .iter()
             .find(|(vid, _)| *vid == id)
             .map(|(_, v)| *v)
             .unwrap_or(U256::ZERO);
@@ -208,18 +223,26 @@ impl MockAlertRegistry {
             return true; // Owner has all roles
         }
 
-        if role == 0x02 && caller == self.detection_engine && self.detection_engine != Address::ZERO {
+        if role == 0x02 && caller == self.detection_engine && self.detection_engine != Address::ZERO
+        {
             return true; // DetectionEngine has MONITOR_ROLE
         }
 
-        self.roles.iter()
+        self.roles
+            .iter()
             .find(|(addr, _)| *addr == caller)
             .map(|(_, r)| (r & role) == role)
             .unwrap_or(false)
     }
 
-    fn grant_role(&mut self, caller: Address, account: Address, role: u8) -> Result<(), &'static str> {
-        if !self.has_role(caller, 0x01) { // ADMIN_ROLE
+    fn grant_role(
+        &mut self,
+        caller: Address,
+        account: Address,
+        role: u8,
+    ) -> Result<(), &'static str> {
+        if !self.has_role(caller, 0x01) {
+            // ADMIN_ROLE
             return Err("InsufficientRole");
         }
 
@@ -239,7 +262,12 @@ impl MockAlertRegistry {
         Ok(())
     }
 
-    fn revoke_role(&mut self, caller: Address, account: Address, role: u8) -> Result<(), &'static str> {
+    fn revoke_role(
+        &mut self,
+        caller: Address,
+        account: Address,
+        role: u8,
+    ) -> Result<(), &'static str> {
         if !self.has_role(caller, 0x01) {
             return Err("InsufficientRole");
         }
@@ -256,8 +284,14 @@ impl MockAlertRegistry {
         Ok(())
     }
 
-    fn register_enhanced_alert(&mut self, caller: Address, protocol: Address, threat_level: U256) -> Result<U256, &'static str> {
-        if !self.has_role(caller, 0x02) { // MONITOR_ROLE
+    fn register_enhanced_alert(
+        &mut self,
+        caller: Address,
+        protocol: Address,
+        threat_level: U256,
+    ) -> Result<U256, &'static str> {
+        if !self.has_role(caller, 0x02) {
+            // MONITOR_ROLE
             return Err("InsufficientRole");
         }
 
@@ -274,14 +308,19 @@ impl MockAlertRegistry {
         let alert_id = self.enhanced_alert_count;
 
         // Update counts
-        if let Some((_, count)) = self.protocol_alert_counts.iter_mut().find(|(p, _)| *p == protocol) {
+        if let Some((_, count)) = self
+            .protocol_alert_counts
+            .iter_mut()
+            .find(|(p, _)| *p == protocol)
+        {
             *count = count.saturating_add(U256::from(1));
         } else {
             self.protocol_alert_counts.push((protocol, U256::from(1)));
         }
 
         if priority_idx < 4 {
-            self.priority_counts[priority_idx] = self.priority_counts[priority_idx].saturating_add(U256::from(1));
+            self.priority_counts[priority_idx] =
+                self.priority_counts[priority_idx].saturating_add(U256::from(1));
         }
 
         self.acknowledged.push((alert_id, false));
@@ -289,7 +328,12 @@ impl MockAlertRegistry {
         Ok(alert_id)
     }
 
-    fn acknowledge_alert(&mut self, caller: Address, alert_id: U256, alert_protocol: Address) -> Result<(), &'static str> {
+    fn acknowledge_alert(
+        &mut self,
+        caller: Address,
+        alert_id: U256,
+        alert_protocol: Address,
+    ) -> Result<(), &'static str> {
         // Check caller is either the protocol or admin
         let is_authorized = caller == alert_protocol || self.has_role(caller, 0x01);
 
@@ -336,7 +380,8 @@ mod reentrancy_tests {
         let mut cb = MockCircuitBreaker::new(owner);
 
         // Trip the circuit
-        cb.trip(owner, U256::from(1000)).expect("Trip should succeed");
+        cb.trip(owner, U256::from(1000))
+            .expect("Trip should succeed");
 
         // Verify state was changed (this proves state change happened before event emission)
         assert!(cb.is_tripped, "Circuit should be tripped");
@@ -371,7 +416,9 @@ mod reentrancy_tests {
         );
 
         // Verify protocol count was updated (proves state change before event)
-        let protocol_count = ar.protocol_alert_counts.iter()
+        let protocol_count = ar
+            .protocol_alert_counts
+            .iter()
             .find(|(p, _)| *p == protocol)
             .map(|(_, c)| *c)
             .unwrap_or(U256::ZERO);
@@ -394,7 +441,11 @@ mod reentrancy_tests {
             .expect("Registration should succeed");
 
         // Verify state was changed before event
-        assert_eq!(de.metric_count, U256::from(1), "Metric count should be updated");
+        assert_eq!(
+            de.metric_count,
+            U256::from(1),
+            "Metric count should be updated"
+        );
         assert!(de.thresholds.iter().any(|(id, _)| *id == metric_id));
     }
 
@@ -444,7 +495,8 @@ mod arithmetic_safety_tests {
             if i > 0 {
                 cb.reset(owner).expect("Reset should succeed");
             }
-            cb.trip(owner, U256::from(i + 1000)).expect("Trip should succeed");
+            cb.trip(owner, U256::from(i + 1000))
+                .expect("Trip should succeed");
             assert_eq!(
                 cb.trip_count,
                 U256::from(i + 1),
@@ -469,7 +521,11 @@ mod arithmetic_safety_tests {
                 .expect("Registration should succeed");
         }
 
-        assert_eq!(de.metric_count, U256::from(1000), "Metric count should be 1000");
+        assert_eq!(
+            de.metric_count,
+            U256::from(1000),
+            "Metric count should be 1000"
+        );
     }
 
     /// SEC-007: Test alert count overflow protection
@@ -488,9 +544,15 @@ mod arithmetic_safety_tests {
                 .expect("Registration should succeed");
         }
 
-        assert_eq!(ar.enhanced_alert_count, U256::from(500), "Alert count should be 500");
+        assert_eq!(
+            ar.enhanced_alert_count,
+            U256::from(500),
+            "Alert count should be 500"
+        );
 
-        let protocol_count = ar.protocol_alert_counts.iter()
+        let protocol_count = ar
+            .protocol_alert_counts
+            .iter()
             .find(|(p, _)| *p == protocol)
             .map(|(_, c)| *c)
             .unwrap_or(U256::ZERO);
@@ -520,11 +582,26 @@ mod arithmetic_safety_tests {
         );
 
         // Test boundary values
-        assert_eq!(AlertRegistry::compute_priority(U256::from(0)), U256::from(0));
-        assert_eq!(AlertRegistry::compute_priority(U256::from(39)), U256::from(0));
-        assert_eq!(AlertRegistry::compute_priority(U256::from(40)), U256::from(1));
-        assert_eq!(AlertRegistry::compute_priority(U256::from(70)), U256::from(2));
-        assert_eq!(AlertRegistry::compute_priority(U256::from(90)), U256::from(3));
+        assert_eq!(
+            AlertRegistry::compute_priority(U256::from(0)),
+            U256::from(0)
+        );
+        assert_eq!(
+            AlertRegistry::compute_priority(U256::from(39)),
+            U256::from(0)
+        );
+        assert_eq!(
+            AlertRegistry::compute_priority(U256::from(40)),
+            U256::from(1)
+        );
+        assert_eq!(
+            AlertRegistry::compute_priority(U256::from(70)),
+            U256::from(2)
+        );
+        assert_eq!(
+            AlertRegistry::compute_priority(U256::from(90)),
+            U256::from(3)
+        );
     }
 
     /// SEC-009: Test timestamp arithmetic safety
@@ -568,7 +645,8 @@ mod arithmetic_safety_tests {
             if i > 0 {
                 cb.reset(owner).expect("Reset should succeed");
             }
-            cb.trip(owner, U256::from(i + 1000)).expect("Trip should succeed");
+            cb.trip(owner, U256::from(i + 1000))
+                .expect("Trip should succeed");
         }
 
         // Should saturate at MAX, not wrap around
@@ -599,7 +677,8 @@ mod access_control_tests {
         let mut cb = MockCircuitBreaker::new(owner);
 
         // Owner can trip
-        cb.trip(owner, U256::from(1000)).expect("Owner should be able to trip");
+        cb.trip(owner, U256::from(1000))
+            .expect("Owner should be able to trip");
 
         cb.reset(owner).expect("Reset for next test");
 
@@ -618,7 +697,8 @@ mod access_control_tests {
         let attacker = Address::repeat_byte(0x99);
         let mut cb = MockCircuitBreaker::new(owner);
 
-        cb.trip(owner, U256::from(1000)).expect("Trip should succeed");
+        cb.trip(owner, U256::from(1000))
+            .expect("Trip should succeed");
 
         // Non-owner cannot reset
         let result = cb.reset(attacker);
@@ -660,7 +740,10 @@ mod access_control_tests {
         let user = Address::repeat_byte(0x42);
 
         // Initially user has no roles
-        assert!(!ar.has_role(user, 0x02), "User should not have MONITOR_ROLE initially");
+        assert!(
+            !ar.has_role(user, 0x02),
+            "User should not have MONITOR_ROLE initially"
+        );
 
         // Grant MONITOR_ROLE
         ar.grant_role(owner, user, 0x02).expect("Should grant role");
@@ -681,10 +764,14 @@ mod access_control_tests {
 
         // Grant and then revoke
         ar.grant_role(owner, user, 0x02).expect("Should grant role");
-        ar.revoke_role(owner, user, 0x02).expect("Should revoke role");
+        ar.revoke_role(owner, user, 0x02)
+            .expect("Should revoke role");
 
         // Verify role is removed
-        assert!(!ar.has_role(user, 0x02), "User should not have role after revocation");
+        assert!(
+            !ar.has_role(user, 0x02),
+            "User should not have role after revocation"
+        );
     }
 
     /// SEC-016: Verify owner cannot be zero address
@@ -740,10 +827,12 @@ mod access_control_tests {
         let user = Address::repeat_byte(0x42);
 
         // Valid roles: ADMIN (0x01), MONITOR (0x02)
-        ar.grant_role(owner, user, 0x01).expect("Should grant ADMIN");
+        ar.grant_role(owner, user, 0x01)
+            .expect("Should grant ADMIN");
         assert!(ar.has_role(user, 0x01));
 
-        ar.grant_role(owner, user, 0x02).expect("Should grant MONITOR");
+        ar.grant_role(owner, user, 0x02)
+            .expect("Should grant MONITOR");
         assert!(ar.has_role(user, 0x02));
 
         // User should now have both roles
@@ -1027,7 +1116,10 @@ mod business_logic_tests {
         assert!(cb.is_tripped);
 
         // Cannot trip when already tripped
-        assert!(cb.trip(owner, U256::from(2000)).is_err(), "Cannot trip when already tripped");
+        assert!(
+            cb.trip(owner, U256::from(2000)).is_err(),
+            "Cannot trip when already tripped"
+        );
 
         // Can reset when tripped
         cb.reset(owner).expect("Should reset");
@@ -1115,15 +1207,15 @@ mod business_logic_tests {
     fn sec033_priority_boundaries() {
         // Test various threat levels
         let test_cases = vec![
-            (0, 0),     // LOW
-            (39, 0),    // LOW
-            (40, 1),    // MEDIUM
-            (69, 1),    // MEDIUM
-            (70, 2),    // HIGH
-            (89, 2),    // HIGH
-            (90, 3),    // CRITICAL
-            (100, 3),   // CRITICAL
-            (1000, 3),  // CRITICAL (over max)
+            (0, 0),    // LOW
+            (39, 0),   // LOW
+            (40, 1),   // MEDIUM
+            (69, 1),   // MEDIUM
+            (70, 2),   // HIGH
+            (89, 2),   // HIGH
+            (90, 3),   // CRITICAL
+            (100, 3),  // CRITICAL
+            (1000, 3), // CRITICAL (over max)
         ];
 
         for (threat, expected_priority) in test_cases {
@@ -1174,8 +1266,16 @@ mod error_encoding_tests {
         let ar_err: Vec<u8> = ARError::UnauthorizedCaller(addr).into();
 
         // All should have same selector (first 4 bytes)
-        assert_eq!(&cb_err[0..4], &de_err[0..4], "CB and DE selectors should match");
-        assert_eq!(&de_err[0..4], &ar_err[0..4], "DE and AR selectors should match");
+        assert_eq!(
+            &cb_err[0..4],
+            &de_err[0..4],
+            "CB and DE selectors should match"
+        );
+        assert_eq!(
+            &de_err[0..4],
+            &ar_err[0..4],
+            "DE and AR selectors should match"
+        );
 
         // InvalidOwner errors
         let cb_inv: Vec<u8> = CBError::InvalidOwner(addr).into();
@@ -1224,7 +1324,11 @@ mod error_encoding_tests {
         // AlertRegistry errors (sample)
         let _: Vec<u8> = ARError::UnauthorizedCaller(addr).into();
         let _: Vec<u8> = ARError::InvalidOwner(addr).into();
-        let _: Vec<u8> = ARError::InsufficientRole { caller: addr, required_role: 0x01 }.into();
+        let _: Vec<u8> = ARError::InsufficientRole {
+            caller: addr,
+            required_role: 0x01,
+        }
+        .into();
         let _: Vec<u8> = ARError::InvalidRole(0xFF).into();
 
         // All errors encode without panicking
@@ -1282,13 +1386,13 @@ mod upgrade_safety_tests {
         let protocol = Address::repeat_byte(0x42);
 
         // Register alerts with different priorities
-        ar.register_enhanced_alert(owner, protocol, U256::from(20))  // LOW
+        ar.register_enhanced_alert(owner, protocol, U256::from(20)) // LOW
             .expect("Should register");
-        ar.register_enhanced_alert(owner, protocol, U256::from(50))  // MEDIUM
+        ar.register_enhanced_alert(owner, protocol, U256::from(50)) // MEDIUM
             .expect("Should register");
-        ar.register_enhanced_alert(owner, protocol, U256::from(75))  // HIGH
+        ar.register_enhanced_alert(owner, protocol, U256::from(75)) // HIGH
             .expect("Should register");
-        ar.register_enhanced_alert(owner, protocol, U256::from(95))  // CRITICAL
+        ar.register_enhanced_alert(owner, protocol, U256::from(95)) // CRITICAL
             .expect("Should register");
 
         // Verify counts
@@ -1298,7 +1402,10 @@ mod upgrade_safety_tests {
         assert_eq!(ar.priority_counts[3], U256::from(1), "CRITICAL count");
 
         // Total should equal enhanced_alert_count
-        let total: U256 = ar.priority_counts.iter().fold(U256::ZERO, |acc, &x| acc.saturating_add(x));
+        let total: U256 = ar
+            .priority_counts
+            .iter()
+            .fold(U256::ZERO, |acc, &x| acc.saturating_add(x));
         assert_eq!(total, ar.enhanced_alert_count);
     }
 }
@@ -1324,7 +1431,9 @@ mod additional_security_tests {
 
         // AlertRegistry
         let mut ar = MockAlertRegistry::new(owner);
-        assert!(ar.register_enhanced_alert(owner, Address::ZERO, U256::from(50)).is_err());
+        assert!(ar
+            .register_enhanced_alert(owner, Address::ZERO, U256::from(50))
+            .is_err());
     }
 
     /// SEC-041: Verify role inheritance (owner has all roles)
@@ -1353,11 +1462,18 @@ mod additional_security_tests {
         ar.detection_engine = de_addr;
 
         // DetectionEngine should have MONITOR_ROLE implicitly
-        assert!(ar.has_role(de_addr, 0x02), "DetectionEngine should have MONITOR_ROLE");
+        assert!(
+            ar.has_role(de_addr, 0x02),
+            "DetectionEngine should have MONITOR_ROLE"
+        );
 
         // Should be able to register alerts
-        let result = ar.register_enhanced_alert(de_addr, Address::repeat_byte(0x42), U256::from(75));
-        assert!(result.is_ok(), "DetectionEngine should be able to register alerts");
+        let result =
+            ar.register_enhanced_alert(de_addr, Address::repeat_byte(0x42), U256::from(75));
+        assert!(
+            result.is_ok(),
+            "DetectionEngine should be able to register alerts"
+        );
     }
 }
 

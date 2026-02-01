@@ -272,14 +272,14 @@ fn invariant_ar3_acknowledgment_does_not_affect_count() {
 fn invariant_ar4_priority_deterministic() {
     // Test all threat level ranges
     let test_cases = vec![
-        (0, 0),    // LOW
-        (39, 0),   // LOW
-        (40, 1),   // MEDIUM
-        (69, 1),   // MEDIUM
-        (70, 2),   // HIGH
-        (89, 2),   // HIGH
-        (90, 3),   // CRITICAL
-        (100, 3),  // CRITICAL
+        (0, 0),   // LOW
+        (39, 0),  // LOW
+        (40, 1),  // MEDIUM
+        (69, 1),  // MEDIUM
+        (70, 2),  // HIGH
+        (89, 2),  // HIGH
+        (90, 3),  // CRITICAL
+        (100, 3), // CRITICAL
     ];
 
     for (threat_level, expected_priority) in test_cases {
@@ -313,7 +313,10 @@ fn invariant_ar4_priority_monotonic_with_threat() {
         assert!(
             high_priority >= low_priority,
             "INV-AR-4 VIOLATED: Higher threat {} gave lower priority {} than threat {} priority {}",
-            high_threat, high_priority, low_threat, low_priority
+            high_threat,
+            high_priority,
+            low_threat,
+            low_priority
         );
     }
 }
@@ -449,14 +452,16 @@ fn stress_test_1000_operations_maintain_all_invariants() {
                 assert_eq!(
                     id,
                     before_count.saturating_add(U256::from(1)),
-                    "INV-AR-1 violated at op {}", i
+                    "INV-AR-1 violated at op {}",
+                    i
                 );
 
                 // INV-AR-3: Count increased
                 assert_eq!(
                     registry.enhanced_alert_count,
                     before_count.saturating_add(U256::from(1)),
-                    "INV-AR-3 violated at op {}", i
+                    "INV-AR-3 violated at op {}",
+                    i
                 );
 
                 // INV-AR-4: Priority is correct
@@ -481,7 +486,9 @@ fn stress_test_1000_operations_maintain_all_invariants() {
                     // INV-AR-2: Should be acknowledged after
                     assert!(
                         registry.is_acknowledged(id),
-                        "INV-AR-2 violated: alert {} not acknowledged at op {}", id, i
+                        "INV-AR-2 violated: alert {} not acknowledged at op {}",
+                        id,
+                        i
                     );
                 }
             }
@@ -491,5 +498,8 @@ fn stress_test_1000_operations_maintain_all_invariants() {
     println!("✓ All AlertRegistry invariants held across 1000 operations");
     println!("  Total alerts: {}", registry.enhanced_alert_count);
     println!("  Alerts in vec: {}", registry.alerts.len());
-    println!("  Acknowledged: {}", registry.alerts.iter().filter(|(_, _, ack)| *ack).count());
+    println!(
+        "  Acknowledged: {}",
+        registry.alerts.iter().filter(|(_, _, ack)| *ack).count()
+    );
 }

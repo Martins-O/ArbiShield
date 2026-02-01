@@ -13,11 +13,11 @@
 // open target/criterion/report/index.html
 // ```
 
-use criterion::{black_box, criterion_group, criterion_main, Criterion, BenchmarkId, Throughput};
 use alloy_primitives::{Address, U256};
+use arbishield::alert_registry::storage::AlertRegistryState;
 use arbishield::circuit_breaker::storage::CircuitBreakerState;
 use arbishield::detection_engine::storage::DetectionEngineState;
-use arbishield::alert_registry::storage::AlertRegistryState;
+use criterion::{black_box, criterion_group, criterion_main, BenchmarkId, Criterion, Throughput};
 
 // ============================================================================
 // Solidity Gas Baselines (from equivalent Solidity implementations)
@@ -28,17 +28,17 @@ use arbishield::alert_registry::storage::AlertRegistryState;
 // - Standard Solidity patterns
 // - Arbitrum One gas measurements
 
-const SOLIDITY_PAUSE_GAS: u64 = 50_000;              // Pausable.pause()
-const SOLIDITY_RESUME_GAS: u64 = 50_000;             // Pausable.unpause()
-const SOLIDITY_TRIP_GAS: u64 = 75_000;               // Circuit breaker trip with events
-const SOLIDITY_RESET_GAS: u64 = 60_000;              // Circuit breaker reset
+const SOLIDITY_PAUSE_GAS: u64 = 50_000; // Pausable.pause()
+const SOLIDITY_RESUME_GAS: u64 = 50_000; // Pausable.unpause()
+const SOLIDITY_TRIP_GAS: u64 = 75_000; // Circuit breaker trip with events
+const SOLIDITY_RESET_GAS: u64 = 60_000; // Circuit breaker reset
 const SOLIDITY_CONFIGURE_THRESHOLD_GAS: u64 = 80_000; // Mapping write + event
-const SOLIDITY_REPORT_METRIC_GAS: u64 = 60_000;      // Mapping write + event
-const SOLIDITY_CHECK_ANOMALY_GAS: u64 = 25_000;      // Two SLOAD operations
-const SOLIDITY_REGISTER_ALERT_GAS: u64 = 120_000;    // Complex struct + mappings + event
-const SOLIDITY_ACKNOWLEDGE_ALERT_GAS: u64 = 70_000;  // Mapping update + event
-const SOLIDITY_GRANT_ROLE_GAS: u64 = 55_000;         // AccessControl role grant
-const SOLIDITY_BATCH_5_ALERTS_GAS: u64 = 500_000;    // 5x alert registration
+const SOLIDITY_REPORT_METRIC_GAS: u64 = 60_000; // Mapping write + event
+const SOLIDITY_CHECK_ANOMALY_GAS: u64 = 25_000; // Two SLOAD operations
+const SOLIDITY_REGISTER_ALERT_GAS: u64 = 120_000; // Complex struct + mappings + event
+const SOLIDITY_ACKNOWLEDGE_ALERT_GAS: u64 = 70_000; // Mapping update + event
+const SOLIDITY_GRANT_ROLE_GAS: u64 = 55_000; // AccessControl role grant
+const SOLIDITY_BATCH_5_ALERTS_GAS: u64 = 500_000; // 5x alert registration
 
 // Target: Stylus should be 10x cheaper
 const TARGET_IMPROVEMENT_FACTOR: f64 = 10.0;
@@ -266,7 +266,7 @@ fn benchmark_alert_register_enhanced(c: &mut Criterion) {
                 black_box(protocol),
                 black_box(threat_level),
                 black_box(pattern),
-                black_box(timestamp)
+                black_box(timestamp),
             );
 
             state
@@ -288,10 +288,15 @@ fn benchmark_alert_acknowledge(c: &mut Criterion) {
 
         b.iter(|| {
             let mut state = AlertRegistryState::new(owner);
-            let alert_id = state.register_enhanced_alert(protocol, threat_level, pattern, timestamp);
+            let alert_id =
+                state.register_enhanced_alert(protocol, threat_level, pattern, timestamp);
 
             // Measure acknowledgment
-            state.acknowledge_alert(black_box(alert_id), black_box(protocol), black_box(timestamp));
+            state.acknowledge_alert(
+                black_box(alert_id),
+                black_box(protocol),
+                black_box(timestamp),
+            );
 
             state
         });
@@ -371,7 +376,7 @@ fn benchmark_batch_alert_registration(c: &mut Criterion) {
                     black_box(protocol),
                     black_box(threat_level),
                     black_box(pattern),
-                    black_box(timestamp)
+                    black_box(timestamp),
                 );
             }
 
@@ -457,7 +462,7 @@ fn benchmark_storage_writes_scalability(c: &mut Criterion) {
                         black_box(protocol),
                         black_box(threat_level),
                         black_box(pattern),
-                        black_box(timestamp)
+                        black_box(timestamp),
                     );
                 }
 
@@ -498,7 +503,7 @@ fn benchmark_storage_reads_scalability(c: &mut Criterion) {
                         black_box(state.get_enhanced_alert_count());
                     }
                 });
-            }
+            },
         );
     }
 
@@ -536,28 +541,23 @@ criterion_group!(
     benchmark_circuit_breaker_trip,
     benchmark_circuit_breaker_reset,
     benchmark_circuit_breaker_is_tripped,
-
     // DetectionEngine
     benchmark_detection_configure_threshold,
     benchmark_detection_report_metric,
     benchmark_detection_check_anomaly,
     benchmark_detection_analyze_threat,
-
     // AlertRegistry
     benchmark_alert_register_enhanced,
     benchmark_alert_acknowledge,
     benchmark_alert_grant_role,
     benchmark_alert_get_count,
-
     // Batch Operations
     benchmark_batch_alert_registration,
     benchmark_batch_threshold_configuration,
     benchmark_batch_pause_operations,
-
     // Storage Scalability
     benchmark_storage_writes_scalability,
     benchmark_storage_reads_scalability,
-
     // Comparison
     benchmark_gas_comparison_report,
 );

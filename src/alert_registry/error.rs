@@ -90,10 +90,7 @@ pub enum Error {
 
     // === V2: Role Management Errors ===
     /// Caller does not have sufficient role permissions
-    InsufficientRole {
-        caller: Address,
-        required_role: u8,
-    },
+    InsufficientRole { caller: Address, required_role: u8 },
     /// Invalid role value
     InvalidRole(u8),
     /// Cannot revoke own role (prevents lockout)
@@ -111,10 +108,7 @@ pub enum Error {
     /// Alert is already acknowledged
     AlertAlreadyAcknowledged { id: U256 },
     /// Caller is not the protocol for this alert
-    NotAlertProtocol {
-        caller: Address,
-        id: U256,
-    },
+    NotAlertProtocol { caller: Address, id: U256 },
 
     // === V2: Priority Errors ===
     /// Invalid priority level
@@ -122,10 +116,7 @@ pub enum Error {
 
     // === V2: Limit Errors ===
     /// Batch size exceeds maximum
-    BatchSizeTooLarge {
-        size: U256,
-        max: U256,
-    },
+    BatchSizeTooLarge { size: U256, max: U256 },
 
     // === V2: Configuration Errors ===
     /// Invalid expiration duration
@@ -142,69 +133,43 @@ impl From<Error> for Vec<u8> {
     fn from(err: Error) -> Vec<u8> {
         match err {
             // V1 errors
-            Error::AlertNotFound { id } => {
-                AlertNotFound { id }.abi_encode()
-            }
-            Error::InvalidAlert => {
-                InvalidAlert {}.abi_encode()
-            }
-            Error::UnauthorizedCaller(caller) => {
-                UnauthorizedCaller { caller }.abi_encode()
-            }
-            Error::InvalidOwner(owner) => {
-                InvalidOwner { owner }.abi_encode()
-            }
+            Error::AlertNotFound { id } => AlertNotFound { id }.abi_encode(),
+            Error::InvalidAlert => InvalidAlert {}.abi_encode(),
+            Error::UnauthorizedCaller(caller) => UnauthorizedCaller { caller }.abi_encode(),
+            Error::InvalidOwner(owner) => InvalidOwner { owner }.abi_encode(),
 
             // V2: Role management errors
-            Error::InsufficientRole { caller, required_role } => {
-                InsufficientRole {
-                    caller,
-                    required_role,
-                }.abi_encode()
+            Error::InsufficientRole {
+                caller,
+                required_role,
+            } => InsufficientRole {
+                caller,
+                required_role,
             }
-            Error::InvalidRole(role) => {
-                InvalidRole { role }.abi_encode()
-            }
-            Error::CannotRevokeOwnRole(caller) => {
-                CannotRevokeOwnRole { caller }.abi_encode()
-            }
+            .abi_encode(),
+            Error::InvalidRole(role) => InvalidRole { role }.abi_encode(),
+            Error::CannotRevokeOwnRole(caller) => CannotRevokeOwnRole { caller }.abi_encode(),
 
             // V2: Subscriber errors
-            Error::AlreadySubscribed(subscriber) => {
-                AlreadySubscribed { subscriber }.abi_encode()
-            }
-            Error::NotSubscribed(subscriber) => {
-                NotSubscribed { subscriber }.abi_encode()
-            }
-            Error::InvalidSubscriber(subscriber) => {
-                InvalidSubscriber { subscriber }.abi_encode()
-            }
+            Error::AlreadySubscribed(subscriber) => AlreadySubscribed { subscriber }.abi_encode(),
+            Error::NotSubscribed(subscriber) => NotSubscribed { subscriber }.abi_encode(),
+            Error::InvalidSubscriber(subscriber) => InvalidSubscriber { subscriber }.abi_encode(),
 
             // V2: Acknowledgment errors
-            Error::AlertAlreadyAcknowledged { id } => {
-                AlertAlreadyAcknowledged { id }.abi_encode()
-            }
-            Error::NotAlertProtocol { caller, id } => {
-                NotAlertProtocol { caller, id }.abi_encode()
-            }
+            Error::AlertAlreadyAcknowledged { id } => AlertAlreadyAcknowledged { id }.abi_encode(),
+            Error::NotAlertProtocol { caller, id } => NotAlertProtocol { caller, id }.abi_encode(),
 
             // V2: Priority errors
-            Error::InvalidPriorityLevel { level } => {
-                InvalidPriorityLevel { level }.abi_encode()
-            }
+            Error::InvalidPriorityLevel { level } => InvalidPriorityLevel { level }.abi_encode(),
 
             // V2: Limit errors
-            Error::BatchSizeTooLarge { size, max } => {
-                BatchSizeTooLarge { size, max }.abi_encode()
-            }
+            Error::BatchSizeTooLarge { size, max } => BatchSizeTooLarge { size, max }.abi_encode(),
 
             // V2: Configuration errors
             Error::InvalidExpirationDuration { duration } => {
                 InvalidExpirationDuration { duration }.abi_encode()
             }
-            Error::InvalidAddress(addr) => {
-                InvalidAddress { addr }.abi_encode()
-            }
+            Error::InvalidAddress(addr) => InvalidAddress { addr }.abi_encode(),
 
             // V2: ERC-165 errors
             Error::UnsupportedInterface(interface_id) => {

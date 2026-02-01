@@ -150,87 +150,13 @@ pub enum Error {
 impl From<Error> for Vec<u8> {
     fn from(err: Error) -> Vec<u8> {
         match err {
-            // V1 errors
-            Error::UnauthorizedCaller(caller) => {
-                UnauthorizedCaller { caller }.abi_encode()
-            }
-            Error::MetricNotFound { id } => {
-                MetricNotFound { id }.abi_encode()
-            }
-            Error::InvalidThreshold { value } => {
-                InvalidThreshold { value }.abi_encode()
-            }
+            Error::UnauthorizedCaller(caller) => UnauthorizedCaller { caller }.abi_encode(),
+            Error::MetricNotFound { id } => MetricNotFound { id }.abi_encode(),
+            Error::InvalidThreshold { value } => InvalidThreshold { value }.abi_encode(),
             Error::ThresholdExceeded { current, threshold } => {
                 ThresholdExceeded { current, threshold }.abi_encode()
             }
-            Error::InvalidOwner(owner) => {
-                InvalidOwner { owner }.abi_encode()
-            }
-
-            // V2: Role management errors
-            Error::InsufficientRole { caller, required_role } => {
-                InsufficientRole {
-                    caller,
-                    required_role,
-                }.abi_encode()
-            }
-            Error::InvalidRole(role) => {
-                InvalidRole { role }.abi_encode()
-            }
-            Error::CannotRevokeOwnRole(caller) => {
-                CannotRevokeOwnRole { caller }.abi_encode()
-            }
-
-            // V2: Pattern errors
-            Error::PatternNotFound { id } => {
-                PatternNotFound { id }.abi_encode()
-            }
-            Error::PatternAlreadyExists { id } => {
-                PatternAlreadyExists { id }.abi_encode()
-            }
-            Error::InvalidPatternType { pattern_type } => {
-                InvalidPatternType { pattern_type }.abi_encode()
-            }
-            Error::InvalidSeverity { severity } => {
-                InvalidSeverity { severity }.abi_encode()
-            }
-            Error::PatternInactive { id } => {
-                PatternInactive { id }.abi_encode()
-            }
-
-            // V2: Analysis errors
-            Error::AnalysisNotFound { id } => {
-                AnalysisNotFound { id }.abi_encode()
-            }
-            Error::InvalidAnalysisInput => {
-                InvalidAnalysisInput {}.abi_encode()
-            }
-
-            // V2: Whitelist errors
-            Error::AddressAlreadyWhitelisted(addr) => {
-                AddressAlreadyWhitelisted { addr }.abi_encode()
-            }
-            Error::AddressNotWhitelisted(addr) => {
-                AddressNotWhitelisted { addr }.abi_encode()
-            }
-            Error::InvalidAddress(addr) => {
-                InvalidAddress { addr }.abi_encode()
-            }
-
-            // V2: Configuration errors
-            Error::InvalidThresholdValue { value } => {
-                InvalidThresholdValue { value }.abi_encode()
-            }
-
-            // V2: Limit errors
-            Error::BatchSizeTooLarge { size, max } => {
-                BatchSizeTooLarge { size, max }.abi_encode()
-            }
-
-            // V2: ERC-165 errors
-            Error::UnsupportedInterface(interface_id) => {
-                UnsupportedInterface { interface_id }.abi_encode()
-            }
+            Error::InvalidOwner(owner) => InvalidOwner { owner }.abi_encode(),
         }
     }
 }

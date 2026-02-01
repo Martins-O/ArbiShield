@@ -20,7 +20,7 @@
 extern crate alloc;
 
 use alloc::vec::Vec;
-use alloy_primitives::{Address, U256, FixedBytes};
+use alloy_primitives::{Address, FixedBytes, U256};
 use arbishield::alert_registry::error::Error as ARError;
 use arbishield::alert_registry::storage::AlertRegistry;
 use arbishield::circuit_breaker::error::Error as CBError;
@@ -108,12 +108,14 @@ fn invariant_cc1_selectors_stable_across_addresses() {
         let ar: Vec<u8> = ARError::UnauthorizedCaller(addr).into();
 
         assert_eq!(
-            &cb[0..4], &de[0..4],
+            &cb[0..4],
+            &de[0..4],
             "INV-CC-1 VIOLATED: Selector changed for address {:?}",
             addr
         );
         assert_eq!(
-            &de[0..4], &ar[0..4],
+            &de[0..4],
+            &ar[0..4],
             "INV-CC-1 VIOLATED: Selector changed for address {:?}",
             addr
         );
@@ -121,7 +123,8 @@ fn invariant_cc1_selectors_stable_across_addresses() {
         // Selector should be the same regardless of address
         let first_selector = &cb[0..4];
         assert_eq!(
-            &de[0..4], first_selector,
+            &de[0..4],
+            first_selector,
             "Selector should be invariant to address parameter"
         );
     }
