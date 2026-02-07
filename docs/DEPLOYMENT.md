@@ -447,4 +447,4 @@ Costs vary with gas prices. At typical Arbitrum One prices (0.1 gwei):
 
 ---
 
-For additional help, refer to [ARCHITECTURE.md](./ARCHITECTURE.md) and [TESTING.md](./TESTING.md).
+For additional help, refer to [ARCHITECTURE.md](./ARCHITECTURE.md) and [TESTING_COMPREHENSIVE.md](./TESTING_COMPREHENSIVE.md).

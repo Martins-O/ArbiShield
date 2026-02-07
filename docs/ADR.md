@@ -770,7 +770,6 @@ If upgrades become necessary:
 
 - [Arbitrum Stylus Docs](https://docs.arbitrum.io/stylus)
 - [Gas Comparison](GAS_COMPARISON.md)
-- [Optimization Guide](OPTIMIZATION_GUIDE.md)
 - [API Reference](API_REFERENCE.md)
 
 ---

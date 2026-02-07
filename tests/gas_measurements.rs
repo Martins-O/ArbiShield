@@ -154,7 +154,7 @@ impl MockDetectionEngine {
         let excess = current.saturating_sub(threshold);
         let percentage = excess
             .saturating_mul(U256::from(100))
-            .saturating_div(threshold);
+            / threshold;
 
         if percentage > U256::from(100) {
             U256::from(100)

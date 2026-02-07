@@ -49,8 +49,7 @@ tests/
 └── ...
 
 docs/
-├── GAS_COMPARISON.md          # Detailed Stylus vs Solidity comparison
-└── OPTIMIZATION_GUIDE.md      # Optimization techniques explained
+└── GAS_COMPARISON.md          # Detailed Stylus vs Solidity comparison
 
 scripts/
 ├── gas_report.sh              # Automated gas report generator
@@ -236,7 +235,7 @@ opt-level = "z"
 // 15-20% additional reduction
 ```
 
-See [docs/OPTIMIZATION_GUIDE.md](../docs/OPTIMIZATION_GUIDE.md) for complete guide.
+See [docs/GAS_COMPARISON.md](../docs/GAS_COMPARISON.md) for detailed comparisons.
 
 ## Real-World Cost Projections
 
@@ -382,8 +381,7 @@ ls -lh optimized.wasm
 ## Additional Resources
 
 - **[Gas Comparison](../docs/GAS_COMPARISON.md)** - Detailed Stylus vs Solidity analysis
-- **[Optimization Guide](../docs/OPTIMIZATION_GUIDE.md)** - Techniques and best practices
-- **[Deployment Guide](../scripts/DEPLOYMENT.md)** - Deploy and verify on-chain
+- **[Deployment Guide](../docs/DEPLOYMENT.md)** - Deploy and verify on-chain
 - **[Arbitrum Stylus Docs](https://docs.arbitrum.io/stylus)** - Official documentation
 - **[Stylus Gas Costs](https://docs.arbitrum.io/stylus/stylus-gas-costs)** - Gas pricing model
 
