@@ -579,7 +579,6 @@ open target/criterion/report/index.html
 ## Additional Resources
 
 - [Arbitrum Stylus Documentation](https://docs.arbitrum.io/stylus)
-- [Optimization Guide](./OPTIMIZATION_GUIDE.md)
 - [Benchmark Source Code](../benches/gas_benchmarks.rs)
 - [Gas Measurements](../tests/gas_measurements.rs)
 - [Stylus vs Solidity Performance](https://docs.arbitrum.io/stylus/stylus-gas-costs)

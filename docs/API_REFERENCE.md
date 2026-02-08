@@ -1064,10 +1064,9 @@ See [GAS_COMPARISON.md](GAS_COMPARISON.md) for details.
 
 ## Additional Resources
 
-- **[Optimization Guide](OPTIMIZATION_GUIDE.md)** - Performance techniques
 - **[Security Guide](SECURITY.md)** - Security considerations
-- **[Deployment Guide](../scripts/DEPLOYMENT.md)** - Deployment instructions
-- **[Gas Benchmarks](GAS_BENCHMARKS.md)** - Performance metrics
+- **[Deployment Guide](DEPLOYMENT.md)** - Deployment instructions
+- **[Gas Comparison](GAS_COMPARISON.md)** - Performance metrics
 
 ---
 

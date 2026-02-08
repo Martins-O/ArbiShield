@@ -30,3 +30,11 @@ coverage/
 
 # Documentation
 /target/doc
+
+# Deployment logs and artifacts
+scripts/logs/
+scripts/deployments/
+
+# Tool-specific configs
+.qodo/
+.claude/

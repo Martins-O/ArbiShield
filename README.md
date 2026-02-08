@@ -345,7 +345,10 @@ Before mainnet deployment:
 
 - [Architecture Guide](docs/ARCHITECTURE.md) - System design and patterns
 - [Deployment Guide](docs/DEPLOYMENT.md) - Detailed deployment instructions
-- [Testing Guide](docs/TESTING.md) - Testing strategies and examples
+- [Testing Guide](docs/TESTING_COMPREHENSIVE.md) - Testing strategies and examples
+- [Security Audit](docs/SECURITY_AUDIT_REPORT.md) - Security audit findings
+- [Gas Comparison](docs/GAS_COMPARISON.md) - Rust vs Solidity gas benchmarks
+- [API Reference](docs/API_REFERENCE.md) - Contract API documentation
 
 ## 🤝 Contributing
 
