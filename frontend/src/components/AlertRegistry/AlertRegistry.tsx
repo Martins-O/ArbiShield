@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useAccount, useReadContract } from 'wagmi';
 import { AlertCircle, Filter } from 'lucide-react';
-import { CONTRACT_ADDRESSES, Priority } from '../../types/contracts';
+import { CONTRACT_ADDRESSES, Priority, Alert } from '../../types/contracts';
 import { AlertRegistryABI } from '../../config/abis';
 import AlertCard from './AlertCard';
 import AlertStats from './AlertStats';
@@ -48,60 +48,12 @@ export default function AlertRegistry() {
     args: [Priority.CRITICAL],
   });
 
-  // Mock alerts for demo (would come from subgraph/events in production)
-  const mockAlerts = [
-    {
-      id: 1n,
-      source: '0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb' as const,
-      timestamp: BigInt(Math.floor(Date.now() / 1000) - 3600),
-      message: 'High gas consumption detected in contract execution',
-      priority: Priority.HIGH,
-      threatLevel: 85n,
-      acknowledged: false,
-      acknowledger: '0x0000000000000000000000000000000000000000' as const,
-      ackTimestamp: 0n,
-      expired: false,
-    },
-    {
-      id: 2n,
-      source: '0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb' as const,
-      timestamp: BigInt(Math.floor(Date.now() / 1000) - 7200),
-      message: 'Unusual transaction pattern identified',
-      priority: Priority.MEDIUM,
-      threatLevel: 55n,
-      acknowledged: true,
-      acknowledger: '0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb' as const,
-      ackTimestamp: BigInt(Math.floor(Date.now() / 1000) - 3000),
-      expired: false,
-    },
-    {
-      id: 3n,
-      source: '0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb' as const,
-      timestamp: BigInt(Math.floor(Date.now() / 1000) - 300),
-      message: 'CRITICAL: Potential reentrancy attack detected',
-      priority: Priority.CRITICAL,
-      threatLevel: 95n,
-      acknowledged: false,
-      acknowledger: '0x0000000000000000000000000000000000000000' as const,
-      ackTimestamp: 0n,
-      expired: false,
-    },
-    {
-      id: 4n,
-      source: '0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb' as const,
-      timestamp: BigInt(Math.floor(Date.now() / 1000) - 86400),
-      message: 'Low priority informational alert',
-      priority: Priority.LOW,
-      threatLevel: 25n,
-      acknowledged: true,
-      acknowledger: '0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb' as const,
-      ackTimestamp: BigInt(Math.floor(Date.now() / 1000) - 80000),
-      expired: false,
-    },
-  ];
+  // TODO: Fetch alerts from contract events or subgraph
+  // For now, empty array - will be populated once contracts are deployed
+  const alerts: Alert[] = [];
 
   // Filter alerts
-  const filteredAlerts = mockAlerts.filter((alert) => {
+  const filteredAlerts = alerts.filter((alert) => {
     if (selectedPriority !== null && alert.priority !== selectedPriority) {
       return false;
     }
@@ -183,7 +135,12 @@ export default function AlertRegistry() {
         {sortedAlerts.length === 0 ? (
           <div className="card text-center py-12">
             <AlertCircle className="w-16 h-16 text-slate-600 mx-auto mb-4" />
-            <p className="text-slate-400">No alerts match your filters</p>
+            <h4 className="text-lg font-semibold text-white mb-2">No Alerts Yet</h4>
+            <p className="text-slate-400">
+              {alerts.length === 0
+                ? "Alerts will appear here once contracts are deployed and monitoring begins"
+                : "No alerts match your current filters"}
+            </p>
           </div>
         ) : (
           <div className="space-y-4">

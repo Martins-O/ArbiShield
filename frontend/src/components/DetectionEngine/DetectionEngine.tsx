@@ -44,12 +44,9 @@ export default function DetectionEngine() {
     }
   };
 
-  // Mock metrics for demo (would come from subgraph/events in production)
-  const mockMetrics = [
-    { id: 1n, threshold: 1000n, currentValue: 850n },
-    { id: 2n, threshold: 500n, currentValue: 620n },
-    { id: 3n, threshold: 2000n, currentValue: 1200n },
-  ];
+  // TODO: Fetch metrics from contract events or subgraph
+  // For now, empty array - will be populated once contracts are deployed
+  const metrics: Array<{ id: bigint; threshold: bigint; currentValue: bigint }> = [];
 
   if (!isConnected) {
     return (
@@ -86,9 +83,9 @@ export default function DetectionEngine() {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-slate-400 text-sm">Total Metrics</p>
-              <p className="text-2xl font-bold text-white mt-1">{mockMetrics.length}</p>
+              <p className="text-2xl font-bold text-white mt-1">{metrics.length}</p>
             </div>
-            <Activity className="w-10 h-10 text-primary-500" />
+            <Activity className="w-10 h-10 text-cyan-400" />
           </div>
         </div>
 
@@ -96,7 +93,9 @@ export default function DetectionEngine() {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-slate-400 text-sm">Anomalies Detected</p>
-              <p className="text-2xl font-bold text-orange-500 mt-1">1</p>
+              <p className="text-2xl font-bold text-orange-500 mt-1">
+                {metrics.filter(m => m.currentValue > m.threshold).length}
+              </p>
             </div>
             <AlertTriangle className="w-10 h-10 text-orange-500" />
           </div>
@@ -106,7 +105,9 @@ export default function DetectionEngine() {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-slate-400 text-sm">Normal Status</p>
-              <p className="text-2xl font-bold text-green-500 mt-1">2</p>
+              <p className="text-2xl font-bold text-green-500 mt-1">
+                {metrics.filter(m => m.currentValue <= m.threshold).length}
+              </p>
             </div>
             <TrendingUp className="w-10 h-10 text-green-500" />
           </div>
@@ -158,11 +159,30 @@ export default function DetectionEngine() {
       {/* Metrics List */}
       <div>
         <h3 className="text-xl font-bold text-white mb-4">Registered Metrics</h3>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {mockMetrics.map((metric) => (
-            <MetricCard key={metric.id.toString()} metric={metric} />
-          ))}
-        </div>
+        {metrics.length > 0 ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {metrics.map((metric) => (
+              <MetricCard key={metric.id.toString()} metric={metric} />
+            ))}
+          </div>
+        ) : (
+          <div className="card text-center py-12">
+            <Activity className="w-16 h-16 text-slate-600 mx-auto mb-4" />
+            <h4 className="text-lg font-semibold text-white mb-2">No Metrics Registered</h4>
+            <p className="text-slate-400 mb-4">
+              Register your first metric to start monitoring for anomalies
+            </p>
+            {isOwner && (
+              <button
+                onClick={() => setShowRegisterForm(true)}
+                className="btn-primary inline-flex items-center space-x-2"
+              >
+                <Plus className="w-5 h-5" />
+                <span>Register Metric</span>
+              </button>
+            )}
+          </div>
+        )}
       </div>
 
       {/* Register Metric Modal */}

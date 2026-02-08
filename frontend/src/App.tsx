@@ -1,5 +1,6 @@
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import Dashboard from './components/Dashboard';
+import Home from './components/Home';
 import DetectionEngine from './components/DetectionEngine/DetectionEngine';
 import CircuitBreaker from './components/CircuitBreaker/CircuitBreaker';
 import AlertRegistry from './components/AlertRegistry/AlertRegistry';
@@ -9,7 +10,7 @@ function App() {
     <BrowserRouter>
       <Routes>
         <Route path="/" element={<Dashboard />}>
-          <Route index element={<Navigate to="/detection-engine" replace />} />
+          <Route index element={<Home />} />
           <Route path="detection-engine" element={<DetectionEngine />} />
           <Route path="circuit-breaker" element={<CircuitBreaker />} />
           <Route path="alerts" element={<AlertRegistry />} />
