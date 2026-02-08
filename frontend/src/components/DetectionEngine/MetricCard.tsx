@@ -1,4 +1,4 @@
-import { TrendingUp, AlertTriangle, CheckCircle } from 'lucide-react';
+import { AlertTriangle, CheckCircle } from 'lucide-react';
 import { formatNumber, calculatePercentage } from '../../utils/helpers';
 
 interface MetricCardProps {

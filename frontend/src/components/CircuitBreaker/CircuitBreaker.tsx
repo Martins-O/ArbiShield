@@ -8,7 +8,7 @@ export default function CircuitBreaker() {
   const { address, isConnected } = useAccount();
 
   // Read contract state
-  const { data: isTripped, isLoading: isTrippedLoading } = useReadContract({
+  const { data: isTripped } = useReadContract({
     address: CONTRACT_ADDRESSES.CircuitBreaker,
     abi: CircuitBreakerABI,
     functionName: 'isTripped',

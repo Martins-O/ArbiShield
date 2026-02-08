@@ -24,28 +24,28 @@ export default function AlertRegistry() {
     address: CONTRACT_ADDRESSES.AlertRegistry,
     abi: AlertRegistryABI,
     functionName: 'getPriorityCount',
-    args: [Priority.LOW],
+    args: [BigInt(Priority.LOW)],
   });
 
   const { data: mediumCount } = useReadContract({
     address: CONTRACT_ADDRESSES.AlertRegistry,
     abi: AlertRegistryABI,
     functionName: 'getPriorityCount',
-    args: [Priority.MEDIUM],
+    args: [BigInt(Priority.MEDIUM)],
   });
 
   const { data: highCount } = useReadContract({
     address: CONTRACT_ADDRESSES.AlertRegistry,
     abi: AlertRegistryABI,
     functionName: 'getPriorityCount',
-    args: [Priority.HIGH],
+    args: [BigInt(Priority.HIGH)],
   });
 
   const { data: criticalCount } = useReadContract({
     address: CONTRACT_ADDRESSES.AlertRegistry,
     abi: AlertRegistryABI,
     functionName: 'getPriorityCount',
-    args: [Priority.CRITICAL],
+    args: [BigInt(Priority.CRITICAL)],
   });
 
   // TODO: Fetch alerts from contract events or subgraph

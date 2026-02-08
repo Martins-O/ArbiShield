@@ -3,7 +3,6 @@ import { useAccount, useReadContract, useWriteContract, useWaitForTransactionRec
 import { Activity, Plus, TrendingUp, AlertTriangle } from 'lucide-react';
 import { CONTRACT_ADDRESSES } from '../../types/contracts';
 import { DetectionEngineABI } from '../../config/abis';
-import { formatNumber, calculatePercentage } from '../../utils/helpers';
 import MetricCard from './MetricCard';
 import RegisterMetricForm from './RegisterMetricForm';
 

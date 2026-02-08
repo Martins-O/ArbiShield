@@ -1,5 +1,5 @@
-import { useWriteContract, useWaitForTransactionReceipt, useAccount } from 'wagmi';
-import { Clock, CheckCircle, AlertTriangle } from 'lucide-react';
+import { useWriteContract, useWaitForTransactionReceipt } from 'wagmi';
+import { Clock, CheckCircle } from 'lucide-react';
 import { Alert } from '../../types/contracts';
 import { CONTRACT_ADDRESSES } from '../../types/contracts';
 import { AlertRegistryABI } from '../../config/abis';
@@ -16,7 +16,6 @@ interface AlertCardProps {
 }
 
 export default function AlertCard({ alert }: AlertCardProps) {
-  const { address } = useAccount();
   const { writeContract, data: hash, isPending } = useWriteContract();
   const { isLoading: isConfirming } = useWaitForTransactionReceipt({ hash });
 

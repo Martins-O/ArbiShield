@@ -1,11 +1,11 @@
 import { Outlet, NavLink, Link, useLocation } from 'react-router-dom';
 import { ConnectButton } from '@rainbow-me/rainbowkit';
 import { Shield, Activity, AlertCircle, Zap, Home, Github, Twitter, FileText } from 'lucide-react';
-import { useNetwork } from 'wagmi';
+import { useAccount } from 'wagmi';
 
 export default function Dashboard() {
   const location = useLocation();
-  const { chain } = useNetwork();
+  const { chain } = useAccount();
 
   const navLinks = [
     { to: '/', label: 'Home', icon: Home },
