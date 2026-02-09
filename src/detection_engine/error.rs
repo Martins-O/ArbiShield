@@ -157,6 +157,32 @@ impl From<Error> for Vec<u8> {
                 ThresholdExceeded { current, threshold }.abi_encode()
             }
             Error::InvalidOwner(owner) => InvalidOwner { owner }.abi_encode(),
+            
+            // === V2 Errors ===
+            Error::InsufficientRole { caller, required_role } => {
+                InsufficientRole { caller, required_role }.abi_encode()
+            }
+            Error::InvalidRole(role) => InvalidRole { role }.abi_encode(),
+            Error::CannotRevokeOwnRole(caller) => CannotRevokeOwnRole { caller }.abi_encode(),
+            
+            Error::PatternNotFound { id } => PatternNotFound { id }.abi_encode(),
+            Error::PatternAlreadyExists { id } => PatternAlreadyExists { id }.abi_encode(),
+            Error::InvalidPatternType { pattern_type } => InvalidPatternType { pattern_type }.abi_encode(),
+            Error::InvalidSeverity { severity } => InvalidSeverity { severity }.abi_encode(),
+            Error::PatternInactive { id } => PatternInactive { id }.abi_encode(),
+            
+            Error::AnalysisNotFound { id } => AnalysisNotFound { id }.abi_encode(),
+            Error::InvalidAnalysisInput => InvalidAnalysisInput {}.abi_encode(),
+            
+            Error::AddressAlreadyWhitelisted(addr) => AddressAlreadyWhitelisted { addr }.abi_encode(),
+            Error::AddressNotWhitelisted(addr) => AddressNotWhitelisted { addr }.abi_encode(),
+            Error::InvalidAddress(addr) => InvalidAddress { addr }.abi_encode(),
+            
+            Error::InvalidThresholdValue { value } => InvalidThresholdValue { value }.abi_encode(),
+            
+            Error::BatchSizeTooLarge { size, max } => BatchSizeTooLarge { size, max }.abi_encode(),
+            
+            Error::UnsupportedInterface(interface_id) => UnsupportedInterface { interface_id: interface_id.into() }.abi_encode(),
         }
     }
 }
