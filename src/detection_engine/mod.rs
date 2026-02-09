@@ -21,9 +21,9 @@
 extern crate alloc;
 
 use alloc::vec::Vec;
-use alloy_primitives::{Address, U256};
+use alloy_primitives::{Address, FixedBytes, U256};
 use stylus_sdk::prelude::*;
-use stylus_sdk::{evm, msg};
+use stylus_sdk::{block, evm, msg};
 
 pub mod error;
 pub mod interface;
@@ -31,7 +31,11 @@ pub mod storage;
 
 use error::Error;
 use interface::{
-    AnomalyDetected, IDetectionEngine, MetricRegistered, MetricReported, OwnershipTransferred,
+    AddressRemovedFromWhitelist, AddressWhitelisted, AnomalyDetected, HighThreatDetected,
+    HighThreatThresholdUpdated, IDetectionEngine, MetricRegistered, MetricReported,
+    OwnershipTransferred, PatternActivated, PatternDeactivated, PatternRegistered,
+    PatternTypeRateThresholdUpdated, PatternTypeThresholdUpdated, PatternUpdated, RoleGranted,
+    RoleRevoked, TransactionAnalyzed,
 };
 use storage::DetectionEngine;
 

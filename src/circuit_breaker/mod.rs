@@ -21,7 +21,7 @@
 extern crate alloc;
 
 use alloc::vec::Vec;
-use alloy_primitives::{Address, U256};
+use alloy_primitives::{Address, U256, FixedBytes};
 use stylus_sdk::prelude::*;
 use stylus_sdk::{block, evm, msg};
 
