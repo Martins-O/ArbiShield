@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useAccount, useReadContract } from 'wagmi';
 import { AlertCircle, Filter } from 'lucide-react';
-import { CONTRACT_ADDRESSES, Priority, Alert } from '../../types/contracts';
+import { CONTRACT_ADDRESSES, Alert } from '../../types/contracts';
 import { AlertRegistryABI } from '../../config/abis';
 import AlertCard from './AlertCard';
 import AlertStats from './AlertStats';
@@ -12,13 +12,6 @@ export default function AlertRegistry() {
   const [selectedPriority, setSelectedPriority] = useState<number | null>(null);
   const [showAcknowledged, setShowAcknowledged] = useState(false);
 
-  // Read alert count
-  const { data: alertCount } = useReadContract({
-    address: CONTRACT_ADDRESSES.AlertRegistry,
-    abi: AlertRegistryABI,
-    functionName: 'alertCount',
-  });
-
   // Read system stats
   const { data: stats } = useReadContract({
     address: CONTRACT_ADDRESSES.AlertRegistry,
@@ -26,18 +19,13 @@ export default function AlertRegistry() {
     functionName: 'getSystemStats',
   });
 
-  const totalAlerts = stats ? stats[0] : 0n;
-  const openAlerts = stats ? stats[1] : 0n;
-  const resolvedAlerts = stats ? stats[2] : 0n;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const statsArr = stats as any;
+  const totalAlerts = statsArr ? BigInt(statsArr[0] || 0) : 0n;
+  const openAlerts = statsArr ? BigInt(statsArr[1] || 0) : 0n;
+  const resolvedAlerts = statsArr ? BigInt(statsArr[2] || 0) : 0n;
 
-  // Read all alerts
-  const { data: allAlertIds } = useReadContract({
-    address: CONTRACT_ADDRESSES.AlertRegistry,
-    abi: AlertRegistryABI,
-    functionName: 'getAllAlertIds',
-  });
-
-  // TODO: Fetch alerts from contract - need to iterate through alert IDs
+  // TODO: Fetch individual alerts by iterating through IDs
   const alerts: Alert[] = [];
 
   // Filter alerts

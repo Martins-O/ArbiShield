@@ -20,9 +20,11 @@ export default function CircuitBreaker() {
     functionName: 'owner',
   });
 
-  const isTripped = status ? status[0] : false;
-  const tripCount = status ? status[1] : 0n;
-  const lastTripTime = status ? status[2] : 0n;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const statusArr = status as any;
+  const isTripped = statusArr ? Boolean(statusArr[0]) : false;
+  const tripCount = statusArr ? BigInt(statusArr[1] || 0) : 0n;
+  const lastTripTime = statusArr ? BigInt(statusArr[2] || 0) : 0n;
 
   // Write functions
   const {
