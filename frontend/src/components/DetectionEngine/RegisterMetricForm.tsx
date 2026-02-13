@@ -9,7 +9,6 @@ interface RegisterMetricFormProps {
 }
 
 export default function RegisterMetricForm({ onClose }: RegisterMetricFormProps) {
-  const [metricId, setMetricId] = useState('');
   const [threshold, setThreshold] = useState('');
 
   const { writeContract, data: hash, isPending } = useWriteContract();
@@ -17,14 +16,14 @@ export default function RegisterMetricForm({ onClose }: RegisterMetricFormProps)
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!metricId || !threshold) return;
+    if (!threshold) return;
 
     try {
       writeContract({
         address: CONTRACT_ADDRESSES.DetectionEngine,
         abi: DetectionEngineABI,
         functionName: 'registerMetric',
-        args: [BigInt(metricId), BigInt(threshold)],
+        args: [BigInt(threshold)],
       });
     } catch (error) {
       console.error('Error registering metric:', error);
@@ -63,22 +62,6 @@ export default function RegisterMetricForm({ onClose }: RegisterMetricFormProps)
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
               <label className="block text-sm font-medium text-slate-400 mb-2">
-                Metric ID
-              </label>
-              <input
-                type="number"
-                value={metricId}
-                onChange={(e) => setMetricId(e.target.value)}
-                className="input w-full"
-                placeholder="e.g., 1"
-                min="0"
-                required
-              />
-              <p className="text-xs text-slate-500 mt-1">Unique identifier for this metric</p>
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-slate-400 mb-2">
                 Threshold
               </label>
               <input
@@ -107,7 +90,7 @@ export default function RegisterMetricForm({ onClose }: RegisterMetricFormProps)
               <button
                 type="submit"
                 className="btn-primary flex-1"
-                disabled={isPending || isConfirming || !metricId || !threshold}
+                disabled={isPending || isConfirming || !threshold}
               >
                 {isPending || isConfirming ? 'Registering...' : 'Register Metric'}
               </button>

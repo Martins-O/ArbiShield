@@ -16,40 +16,28 @@ export default function AlertRegistry() {
   const { data: alertCount } = useReadContract({
     address: CONTRACT_ADDRESSES.AlertRegistry,
     abi: AlertRegistryABI,
-    functionName: 'getAlertCount',
+    functionName: 'alertCount',
   });
 
-  // Read priority counts
-  const { data: lowCount } = useReadContract({
+  // Read system stats
+  const { data: stats } = useReadContract({
     address: CONTRACT_ADDRESSES.AlertRegistry,
     abi: AlertRegistryABI,
-    functionName: 'getPriorityCount',
-    args: [BigInt(Priority.LOW)],
+    functionName: 'getSystemStats',
   });
 
-  const { data: mediumCount } = useReadContract({
+  const totalAlerts = stats ? stats[0] : 0n;
+  const openAlerts = stats ? stats[1] : 0n;
+  const resolvedAlerts = stats ? stats[2] : 0n;
+
+  // Read all alerts
+  const { data: allAlertIds } = useReadContract({
     address: CONTRACT_ADDRESSES.AlertRegistry,
     abi: AlertRegistryABI,
-    functionName: 'getPriorityCount',
-    args: [BigInt(Priority.MEDIUM)],
+    functionName: 'getAllAlertIds',
   });
 
-  const { data: highCount } = useReadContract({
-    address: CONTRACT_ADDRESSES.AlertRegistry,
-    abi: AlertRegistryABI,
-    functionName: 'getPriorityCount',
-    args: [BigInt(Priority.HIGH)],
-  });
-
-  const { data: criticalCount } = useReadContract({
-    address: CONTRACT_ADDRESSES.AlertRegistry,
-    abi: AlertRegistryABI,
-    functionName: 'getPriorityCount',
-    args: [BigInt(Priority.CRITICAL)],
-  });
-
-  // TODO: Fetch alerts from contract events or subgraph
-  // For now, empty array - will be populated once contracts are deployed
+  // TODO: Fetch alerts from contract - need to iterate through alert IDs
   const alerts: Alert[] = [];
 
   // Filter alerts
@@ -91,11 +79,9 @@ export default function AlertRegistry() {
 
       {/* Stats */}
       <AlertStats
-        total={alertCount}
-        low={lowCount}
-        medium={mediumCount}
-        high={highCount}
-        critical={criticalCount}
+        total={totalAlerts}
+        open={openAlerts}
+        resolved={resolvedAlerts}
       />
 
       {/* Filters */}

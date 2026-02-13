@@ -33,7 +33,7 @@ export default function DetectionEngine() {
       writeContract({
         address: CONTRACT_ADDRESSES.DetectionEngine,
         abi: DetectionEngineABI,
-        functionName: 'reportMetric',
+        functionName: 'updateMetric',
         args: [BigInt(metricId), BigInt(value)],
       });
       setMetricId('');

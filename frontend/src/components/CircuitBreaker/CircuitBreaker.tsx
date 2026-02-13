@@ -8,22 +8,10 @@ export default function CircuitBreaker() {
   const { address, isConnected } = useAccount();
 
   // Read contract state
-  const { data: isTripped } = useReadContract({
+  const { data: status } = useReadContract({
     address: CONTRACT_ADDRESSES.CircuitBreaker,
     abi: CircuitBreakerABI,
-    functionName: 'isTripped',
-  });
-
-  const { data: tripCount } = useReadContract({
-    address: CONTRACT_ADDRESSES.CircuitBreaker,
-    abi: CircuitBreakerABI,
-    functionName: 'getTripCount',
-  });
-
-  const { data: lastTripTime } = useReadContract({
-    address: CONTRACT_ADDRESSES.CircuitBreaker,
-    abi: CircuitBreakerABI,
-    functionName: 'getLastTripTime',
+    functionName: 'getStatus',
   });
 
   const { data: owner } = useReadContract({
@@ -31,6 +19,10 @@ export default function CircuitBreaker() {
     abi: CircuitBreakerABI,
     functionName: 'owner',
   });
+
+  const isTripped = status ? status[0] : false;
+  const tripCount = status ? status[1] : 0n;
+  const lastTripTime = status ? status[2] : 0n;
 
   // Write functions
   const {
@@ -54,7 +46,8 @@ export default function CircuitBreaker() {
     trip({
       address: CONTRACT_ADDRESSES.CircuitBreaker,
       abi: CircuitBreakerABI,
-      functionName: 'trip',
+      functionName: 'tripManual',
+      args: ["Manual trip from UI"],
     });
   };
 
@@ -63,6 +56,7 @@ export default function CircuitBreaker() {
       address: CONTRACT_ADDRESSES.CircuitBreaker,
       abi: CircuitBreakerABI,
       functionName: 'reset',
+      args: ["Manual reset from UI"],
     });
   };
 
@@ -76,7 +70,7 @@ export default function CircuitBreaker() {
     );
   }
 
-  const tripped = isTripped ?? false;
+  const tripped = isTripped;
 
   return (
     <div className="space-y-6">

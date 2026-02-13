@@ -1,15 +1,13 @@
-import { AlertCircle, Info, AlertTriangle, XCircle } from 'lucide-react';
+import { AlertCircle, CheckCircle } from 'lucide-react';
 import { formatNumber } from '../../utils/helpers';
 
 interface AlertStatsProps {
   total?: bigint;
-  low?: bigint;
-  medium?: bigint;
-  high?: bigint;
-  critical?: bigint;
+  open?: bigint;
+  resolved?: bigint;
 }
 
-export default function AlertStats({ total, low, medium, high, critical }: AlertStatsProps) {
+export default function AlertStats({ total, open, resolved }: AlertStatsProps) {
   const stats = [
     {
       label: 'Total Alerts',
@@ -19,37 +17,23 @@ export default function AlertStats({ total, low, medium, high, critical }: Alert
       bgColor: 'bg-slate-500/20',
     },
     {
-      label: 'Low Priority',
-      value: low ? formatNumber(low) : '0',
-      icon: Info,
-      color: 'text-blue-400',
-      bgColor: 'bg-blue-500/20',
-    },
-    {
-      label: 'Medium Priority',
-      value: medium ? formatNumber(medium) : '0',
-      icon: AlertTriangle,
-      color: 'text-yellow-400',
-      bgColor: 'bg-yellow-500/20',
-    },
-    {
-      label: 'High Priority',
-      value: high ? formatNumber(high) : '0',
-      icon: AlertTriangle,
-      color: 'text-orange-400',
-      bgColor: 'bg-orange-500/20',
-    },
-    {
-      label: 'Critical',
-      value: critical ? formatNumber(critical) : '0',
-      icon: XCircle,
+      label: 'Open',
+      value: open ? formatNumber(open) : '0',
+      icon: AlertCircle,
       color: 'text-red-400',
       bgColor: 'bg-red-500/20',
+    },
+    {
+      label: 'Resolved',
+      value: resolved ? formatNumber(resolved) : '0',
+      icon: CheckCircle,
+      color: 'text-green-400',
+      bgColor: 'bg-green-500/20',
     },
   ];
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
+    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
       {stats.map((stat) => {
         const Icon = stat.icon;
         return (

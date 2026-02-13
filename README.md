@@ -1,8 +1,8 @@
 # 🛡️ ArbiShield
 
-**Production-Grade Security Contracts for Arbitrum Stylus**
+**Production-Grade Security Contracts for Ethereum/Arbitrum**
 
-ArbiShield is a comprehensive security system built on Arbitrum Stylus, providing real-time anomaly detection, circuit breaker functionality, and persistent alert logging. Written in Rust and compiled to WebAssembly, ArbiShield leverages Stylus's performance advantages while maintaining full EVM compatibility.
+ArbiShield is a comprehensive security system for Ethereum/Arbitrum smart contracts, providing real-time anomaly detection, circuit breaker functionality, and persistent alert logging. Now available in Solidity with the same powerful features and security guarantees as the original Stylus version.
 
 ## 📋 Table of Contents
 
@@ -106,21 +106,18 @@ Permanent storage for security alerts.
 
 ## 🔧 Prerequisites
 
-- **Rust**: Version 1.81+ (specified in `rust-toolchain.toml`)
-- **cargo-stylus**: CLI tool for Stylus development
-- **WASM Target**: `wasm32-unknown-unknown`
+- **Node.js**: Version 16+ 
+- **npm** or **yarn**
+- **Hardhat**: For Solidity development and testing
 
 ### Installation
 
 ```bash
-# Install Rust (if not already installed)
-curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
+# Install dependencies
+npm install
 
-# Install cargo-stylus
-cargo install --force cargo-stylus
-
-# Add WASM target
-rustup target add wasm32-unknown-unknown
+# Install Hardhat globally (if needed)
+npm install -g hardhat
 ```
 
 ## 🚀 Installation
@@ -131,8 +128,11 @@ Clone the repository and install dependencies:
 git clone <repository-url>
 cd arbishield
 
-# Build the project
-cargo build --release --target wasm32-unknown-unknown
+# Install dependencies
+npm install
+
+# Compile contracts
+npm run compile
 ```
 
 ## 💻 Development
