@@ -53,7 +53,7 @@ export default function Home() {
     { label: 'Efficiency Boost', value: '12x', sub: 'vs Solidity' },
     { label: 'Security Response', value: '< 1s', sub: 'Real-time' },
     { label: 'Gas Reduction', value: '90%', sub: 'Avg. Saving' },
-    { label: 'Architecture', value: 'WASM', sub: 'Rust-based' },
+    { label: 'Architecture', value: 'L2 Native', sub: 'Performance-Optimized' },
   ];
 
   return (
@@ -89,7 +89,7 @@ export default function Home() {
               variants={itemVariants}
               className="text-xl text-slate-400 mb-12 max-w-2xl mx-auto leading-relaxed"
             >
-              ArbiShield delivers enterprise-grade security monitoring for Arbitrum Stylus contracts.
+              ArbiShield delivers enterprise-grade security monitoring for Arbitrum Smart Contracts.
               Real-time detection, instant response, and surgical precision.
             </motion.p>
 
@@ -190,11 +190,11 @@ export default function Home() {
             <div className="absolute top-0 right-0 w-1/2 h-full bg-gradient-to-l from-cyan-500/5 to-transparent pointer-events-none"></div>
 
             <div className="w-full md:w-1/2">
-              <h2 className="text-4xl font-bold text-white mb-8">Next-Gen Performance <br />with Arbitrum Stylus</h2>
+              <h2 className="text-4xl font-bold text-white mb-8">Next-Gen Performance <br />on Arbitrum</h2>
               <ul className="space-y-6">
                 {[
-                  { icon: Cpu, text: 'Native WASM execution for near-native speed', color: 'cyan' },
-                  { icon: Lock, text: 'Rust-grade memory safety and security', color: 'purple' },
+                  { icon: Cpu, text: 'Native L2 execution for near-native speed', color: 'cyan' },
+                  { icon: Lock, text: 'Advanced memory safety and security', color: 'purple' },
                   { icon: Globe, text: 'Massive reduction in compute resources and fees', color: 'blue' },
                 ].map((item, i) => (
                   <li key={i} className="flex items-center gap-4">

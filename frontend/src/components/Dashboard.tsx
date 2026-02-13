@@ -29,7 +29,7 @@ export default function Dashboard() {
               </div>
               <div className="hidden sm:block">
                 <h1 className="text-xl font-extrabold text-white tracking-tighter leading-none">ArbiShield</h1>
-                <p className="text-[10px] text-cyan-400/80 font-bold uppercase tracking-widest mt-1">Stylus Protocol</p>
+                <p className="text-[10px] text-cyan-400/80 font-bold uppercase tracking-widest mt-1">Arbitrum Protocol</p>
               </div>
             </Link>
 
@@ -90,7 +90,7 @@ export default function Dashboard() {
                 <span className="text-2xl font-black text-white tracking-tighter">ArbiShield</span>
               </div>
               <p className="text-slate-400 max-w-sm leading-relaxed mb-6">
-                Redefining smart contract security with the raw power of Arbitrum Stylus.
+                Redefining smart contract security with the raw power of Arbitrum Layer 2.
                 Real-time monitoring and emergency response at a fraction of the cost.
               </p>
               <div className="flex space-x-4">
@@ -126,7 +126,7 @@ export default function Dashboard() {
               </h4>
               <ul className="space-y-4">
                 <li><a href="#" className="text-slate-400 hover:text-cyan-400 transition-colors text-sm font-medium">Documentation</a></li>
-                <li><a href="#" className="text-slate-400 hover:text-cyan-400 transition-colors text-sm font-medium">Stylus Guide</a></li>
+                <li><a href="#" className="text-slate-400 hover:text-cyan-400 transition-colors text-sm font-medium">Security Guide</a></li>
                 <li><a href="#" className="text-slate-400 hover:text-cyan-400 transition-colors text-sm font-medium">Security Policy</a></li>
               </ul>
             </div>
@@ -139,9 +139,9 @@ export default function Dashboard() {
             <div className="flex items-center gap-6">
               <div className="flex items-center gap-2">
                 <div className="w-1.5 h-1.5 bg-emerald-500 rounded-full"></div>
-                <span className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">Mainnet Ready</span>
+                <span className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">Testnet Live</span>
               </div>
-              <p className="text-[10px] text-cyan-400/60 font-bold uppercase tracking-widest">Powered by Stylus WASM</p>
+              <p className="text-[10px] text-cyan-400/60 font-bold uppercase tracking-widest">Powered by Arbitrum L2</p>
             </div>
           </div>
         </div>

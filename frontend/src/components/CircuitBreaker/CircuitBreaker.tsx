@@ -230,7 +230,7 @@ export default function CircuitBreaker() {
                 {[
                   { label: 'Latency', value: '< 200ms', sub: 'On Arbi-Sepolia' },
                   { label: 'Governance', value: '1 of 1', sub: 'Owner-controlled' },
-                  { label: 'WASM Runtime', value: 'Native', sub: 'Arbitrum Stylus' },
+                  { label: 'Security Runtime', value: 'Native', sub: 'Arbitrum One' },
                 ].map((spec, i) => (
                   <li key={i} className="flex items-center justify-between pb-4 border-b border-white/5 last:border-0 last:pb-0">
                     <div>

@@ -168,7 +168,7 @@ export default function AlertRegistry() {
                 <h4 className="text-xl font-black text-white mb-2">No active threats detected</h4>
                 <p className="text-slate-500 text-sm max-w-sm mx-auto leading-relaxed">
                   {alerts.length === 0
-                    ? "Protocol is operating within safety parameters. Alerts will be recorded here if anomalies are detected by the Stylus backend."
+                    ? "Protocol is operating within safety parameters. Alerts will be recorded here if anomalies are detected by the security engine."
                     : "The refined filter query returned zero results. Adjust criteria to view more incidents."}
                 </p>
               </motion.div>
