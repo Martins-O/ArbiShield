@@ -38,3 +38,4 @@ scripts/deployments/
 # Tool-specific configs
 .qodo/
 .claude/
+node_modules

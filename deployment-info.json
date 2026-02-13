@@ -1,13 +1,13 @@
 {
   "network": {
-    "name": "hardhat",
-    "chainId": "1337"
+    "name": "arbitrumSepolia",
+    "chainId": "421614"
   },
-  "deployer": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
+  "deployer": "0x4A78dFC52566063f50F8cf4eD52F513AEB866A0C",
   "contracts": {
-    "DetectionEngine": "0x5FbDB2315678afecb367f032d93F642f64180aa3",
-    "CircuitBreaker": "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512",
-    "AlertRegistry": "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0"
+    "DetectionEngine": "0x833468151FF5b1f31AFa8D2E4876e4E76ADBDD8F",
+    "CircuitBreaker": "0x62e8F692094506831790DA100040Bd17FfE158F0",
+    "AlertRegistry": "0x454d2F7c4b4bCF5034B0CeE9C50bbF41F2168BB3"
   },
-  "timestamp": "2026-02-12T19:46:33.031Z"
+  "timestamp": "2026-02-13T07:25:40.660Z"
 }

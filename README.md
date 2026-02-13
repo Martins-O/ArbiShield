@@ -1,8 +1,14 @@
 # 🛡️ ArbiShield
 
-**Production-Grade Security Contracts for Ethereum/Arbitrum**
+**Production-Grade Security Contracts for Arbitrum**
 
-ArbiShield is a comprehensive security system for Ethereum/Arbitrum smart contracts, providing real-time anomaly detection, circuit breaker functionality, and persistent alert logging. Now available in Solidity with the same powerful features and security guarantees as the original Stylus version.
+ArbiShield is a comprehensive security system for Arbitrum smart contracts, providing real-time anomaly detection, circuit breaker functionality, and persistent alert logging. Built with Solidity and optimized for production use.
+
+## 🚀 Live on Arbitrum Sepolia
+
+- **DetectionEngine**: [`0x833468151FF5b1f31AFa8D2E4876e4E76ADBDD8F`](https://sepolia.arbiscan.io/address/0x833468151FF5b1f31AFa8D2E4876e4E76ADBDD8F#code)
+- **CircuitBreaker**: [`0x62e8F692094506831790DA100040Bd17FfE158F0`](https://sepolia.arbiscan.io/address/0x62e8F692094506831790DA100040Bd17FfE158F0#code)
+- **AlertRegistry**: [`0x454d2F7c4b4bCF5034B0CeE9C50bbF41F2168BB3`](https://sepolia.arbiscan.io/address/0x454d2F7c4b4bCF5034B0CeE9C50bbF41F2168BB3#code)
 
 ## 📋 Table of Contents
 
@@ -30,11 +36,11 @@ ArbiShield consists of three independent, proxy-upgradeable smart contracts:
 ### Key Features
 
 ✅ **Production-Ready**: Comprehensive error handling and event emission
-✅ **Gas Optimized**: Built with Stylus for up to 10x gas savings
-✅ **Proxy Compatible**: `sol_storage!` layout enables upgrades
+✅ **Gas Optimized**: Solidity 0.8.20 with optimizer enabled (200 runs)
+✅ **Verified Contracts**: All contracts verified on Arbiscan
 ✅ **Independent Design**: Each contract works standalone or coordinated
-✅ **Owner Control**: Simple ownership model with `transfer_ownership()`
-✅ **No Unsafe Code**: Strict Rust safety with `#![forbid(unsafe_code)]`
+✅ **Owner Control**: Simple ownership model with access controls
+✅ **Battle-Tested**: 10 comprehensive tests covering all functionality
 
 ## 🏗️ Architecture
 

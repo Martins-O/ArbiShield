@@ -39,11 +39,11 @@ export interface CircuitBreakerState {
   lastTripTime: bigint;
 }
 
-// Contract addresses (deployed on Arbitrum Sepolia)
+// Contract addresses (deployed on Arbitrum Sepolia - 2026-02-13)
 export const CONTRACT_ADDRESSES = {
-  DetectionEngine: '0x700f33B8fECc0eC61cFAA44F8e6c9BdF751C4e9E' as Address,
-  CircuitBreaker: '0x91b3611115ABc980BD1a4F8E16ad4EBDe61aB07d' as Address,
-  AlertRegistry: '0x02c5084D7fC06cE22746716df892Cde3E05Bb8E1' as Address,
+  DetectionEngine: '0x833468151FF5b1f31AFa8D2E4876e4E76ADBDD8F' as Address,
+  CircuitBreaker: '0x62e8F692094506831790DA100040Bd17FfE158F0' as Address,
+  AlertRegistry: '0x454d2F7c4b4bCF5034B0CeE9C50bbF41F2168BB3' as Address,
 } as const;
 
 export const ARBITRUM_SEPOLIA_CHAIN_ID = 421614;
