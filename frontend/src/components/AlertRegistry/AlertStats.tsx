@@ -1,5 +1,6 @@
-import { AlertCircle, CheckCircle } from 'lucide-react';
+import { Activity, ShieldAlert, ShieldCheck } from 'lucide-react';
 import { formatNumber } from '../../utils/helpers';
+import { motion } from 'framer-motion';
 
 interface AlertStatsProps {
   total?: bigint;
@@ -10,44 +11,45 @@ interface AlertStatsProps {
 export default function AlertStats({ total, open, resolved }: AlertStatsProps) {
   const stats = [
     {
-      label: 'Total Alerts',
+      label: 'Security Events',
       value: total ? formatNumber(total) : '0',
-      icon: AlertCircle,
-      color: 'text-slate-400',
-      bgColor: 'bg-slate-500/20',
+      icon: Activity,
+      color: 'cyan',
     },
     {
-      label: 'Open',
+      label: 'Active Alerts',
       value: open ? formatNumber(open) : '0',
-      icon: AlertCircle,
-      color: 'text-red-400',
-      bgColor: 'bg-red-500/20',
+      icon: ShieldAlert,
+      color: 'red',
     },
     {
-      label: 'Resolved',
+      label: 'Neutralized',
       value: resolved ? formatNumber(resolved) : '0',
-      icon: CheckCircle,
-      color: 'text-green-400',
-      bgColor: 'bg-green-500/20',
+      icon: ShieldCheck,
+      color: 'emerald',
     },
   ];
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-      {stats.map((stat) => {
+    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      {stats.map((stat, i) => {
         const Icon = stat.icon;
         return (
-          <div key={stat.label} className="card">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-slate-400 text-sm">{stat.label}</p>
-                <p className={`text-2xl font-bold ${stat.color} mt-1`}>{stat.value}</p>
-              </div>
-              <div className={`${stat.bgColor} p-3 rounded-lg`}>
-                <Icon className={`w-6 h-6 ${stat.color}`} />
-              </div>
+          <motion.div
+            key={stat.label}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: i * 0.1 }}
+            className="glass-card flex items-center justify-between"
+          >
+            <div>
+              <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1">{stat.label}</p>
+              <p className={`text-3xl font-black text-white mt-1`}>{stat.value}</p>
             </div>
-          </div>
+            <div className={`p-3 bg-${stat.color}-500/10 rounded-xl`}>
+              <Icon className={`w-6 h-6 text-${stat.color}-400`} />
+            </div>
+          </motion.div>
         );
       })}
     </div>

@@ -14,29 +14,28 @@ export default function FilterPanel({
   setShowAcknowledged,
 }: FilterPanelProps) {
   const priorityOptions = [
-    { value: Priority.LOW, label: 'Low', color: 'bg-blue-500/20 text-blue-400 hover:bg-blue-500/30' },
-    { value: Priority.MEDIUM, label: 'Medium', color: 'bg-yellow-500/20 text-yellow-400 hover:bg-yellow-500/30' },
-    { value: Priority.HIGH, label: 'High', color: 'bg-orange-500/20 text-orange-400 hover:bg-orange-500/30' },
-    { value: Priority.CRITICAL, label: 'Critical', color: 'bg-red-500/20 text-red-400 hover:bg-red-500/30' },
+    { value: Priority.LOW, label: 'Low', color: 'cyan' },
+    { value: Priority.MEDIUM, label: 'Medium', color: 'blue' },
+    { value: Priority.HIGH, label: 'Orange', color: 'orange' },
+    { value: Priority.CRITICAL, label: 'Critical', color: 'red' },
   ];
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-8">
       {/* Priority Filter */}
       <div>
-        <label className="block text-sm font-medium text-slate-400 mb-2">Priority</label>
-        <div className="flex flex-wrap gap-2">
+        <label className="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-4">Threat Priority</label>
+        <div className="grid grid-cols-2 gap-3">
           {priorityOptions.map((option) => (
             <button
               key={option.value}
               onClick={() =>
                 setSelectedPriority(selectedPriority === option.value ? null : option.value)
               }
-              className={`px-4 py-2 rounded-lg font-medium transition-colors border ${
-                selectedPriority === option.value
-                  ? `${option.color} border-current`
-                  : 'bg-slate-700 text-slate-300 hover:bg-slate-600 border-slate-600'
-              }`}
+              className={`px-4 py-3 rounded-xl font-bold text-xs transition-all border ${selectedPriority === option.value
+                  ? `bg-${option.color}-500/10 border-${option.color}-500/40 text-${option.color}-400 shadow-[0_0_15px_rgba(0,0,0,0.2)]`
+                  : 'bg-slate-900 shadow-inner text-slate-500 hover:text-slate-300 border-white/5'
+                }`}
             >
               {option.label}
             </button>
@@ -46,15 +45,21 @@ export default function FilterPanel({
 
       {/* Status Filter */}
       <div>
-        <label className="block text-sm font-medium text-slate-400 mb-2">Status</label>
-        <label className="flex items-center space-x-2 cursor-pointer">
-          <input
-            type="checkbox"
-            checked={showAcknowledged}
-            onChange={(e) => setShowAcknowledged(e.target.checked)}
-            className="w-4 h-4 rounded border-slate-600 bg-slate-700 text-primary-600 focus:ring-primary-500 focus:ring-offset-slate-800"
-          />
-          <span className="text-slate-300">Show acknowledged alerts</span>
+        <label className="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-4">Status Filter</label>
+        <label className="flex items-center group cursor-pointer">
+          <div className="relative flex items-center">
+            <input
+              type="checkbox"
+              checked={showAcknowledged}
+              onChange={(e) => setShowAcknowledged(e.target.checked)}
+              className="peer sr-only"
+            />
+            <div className="w-10 h-5 bg-slate-800 rounded-full peer-checked:bg-cyan-500 transition-colors"></div>
+            <div className="absolute left-1 top-1 w-3 h-3 bg-white rounded-full peer-checked:translate-x-5 transition-transform"></div>
+          </div>
+          <span className="ml-3 text-sm font-bold text-slate-400 group-hover:text-slate-200 transition-colors">
+            Include Resolved
+          </span>
         </label>
       </div>
     </div>

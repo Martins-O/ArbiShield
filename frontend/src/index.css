@@ -2,14 +2,23 @@
 @tailwind components;
 @tailwind utilities;
 
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap');
+
 :root {
-  font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
-  line-height: 1.5;
+  font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+  line-height: 1.6;
   font-weight: 400;
 
   color-scheme: dark;
-  color: rgba(255, 255, 255, 0.87);
-  background-color: #0f172a;
+  color: #e2e8f0;
+  background-color: #020617;
+
+  --clr-obsidian: #020617;
+  --clr-obsidian-light: #0f172a;
+  --clr-cyan: #22d3ee;
+  --clr-blue: #3b82f6;
+  --clr-purple: #a855f7;
+  --clr-pink: #f472b6;
 
   font-synthesis: none;
   text-rendering: optimizeLegibility;
@@ -21,6 +30,8 @@ body {
   margin: 0;
   min-width: 320px;
   min-height: 100vh;
+  background: radial-gradient(circle at 50% 0%, #1e1b4b 0%, #020617 100%);
+  background-attachment: fixed;
 }
 
 #root {
@@ -32,39 +43,74 @@ body {
 }
 
 @layer components {
-  .card {
-    @apply bg-slate-800/50 backdrop-blur-sm border border-slate-700/50 rounded-xl p-6 shadow-lg;
+  .glass {
+    @apply bg-white/5 backdrop-blur-xl border border-white/10;
   }
 
-  .btn-primary {
-    @apply bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-600 hover:to-blue-600 text-white font-semibold py-2 px-4 rounded-lg transition-all shadow-lg shadow-cyan-500/20 disabled:opacity-50 disabled:cursor-not-allowed disabled:shadow-none;
+  .glass-card {
+    @apply bg-slate-900/40 backdrop-blur-md border border-slate-700/50 rounded-2xl p-6 shadow-2xl transition-all duration-300;
   }
 
-  .btn-secondary {
-    @apply bg-slate-700/50 hover:bg-slate-600/50 border border-slate-600/50 text-white font-medium py-2 px-4 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed;
+  .glass-card:hover {
+    @apply border-cyan-500/30 bg-slate-900/60 shadow-cyan-500/10;
   }
 
-  .btn-danger {
-    @apply bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white font-semibold py-2 px-4 rounded-lg transition-all shadow-lg shadow-red-500/20 disabled:opacity-50 disabled:cursor-not-allowed disabled:shadow-none;
+  .btn-premium {
+    @apply relative overflow-hidden px-6 py-3 rounded-xl font-bold transition-all duration-300 flex items-center justify-center gap-2;
+    background: linear-gradient(135deg, var(--clr-cyan) 0%, var(--clr-blue) 100%);
+    box-shadow: 0 0 20px rgba(34, 211, 238, 0.2);
   }
 
-  .input {
-    @apply bg-slate-700/50 border border-slate-600/50 text-white rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-cyan-500/50 focus:border-cyan-500/50 transition-all;
+  .btn-premium:hover {
+    @apply scale-[1.02] -translate-y-0.5;
+    box-shadow: 0 0 30px rgba(34, 211, 238, 0.4);
   }
 
-  .badge-low {
-    @apply bg-blue-500/20 text-blue-400 border border-blue-500/30 px-3 py-1 rounded-full text-xs font-semibold;
+  .btn-premium:active {
+    @apply scale-95;
   }
 
-  .badge-medium {
-    @apply bg-yellow-500/20 text-yellow-400 border border-yellow-500/30 px-3 py-1 rounded-full text-xs font-semibold;
+  .btn-outline-premium {
+    @apply px-6 py-3 rounded-xl font-bold border-2 border-slate-700 hover:border-cyan-500/50 hover:bg-cyan-500/5 transition-all duration-300;
   }
 
-  .badge-high {
-    @apply bg-orange-500/20 text-orange-400 border border-orange-500/30 px-3 py-1 rounded-full text-xs font-semibold;
+  .text-glow-cyan {
+    text-shadow: 0 0 10px rgba(34, 211, 238, 0.5);
   }
 
-  .badge-critical {
-    @apply bg-red-500/20 text-red-400 border border-red-500/30 px-3 py-1 rounded-full text-xs font-semibold;
+  .bg-gradient-mesh {
+    background-image: 
+      radial-gradient(at 0% 0%, hsla(187,100%,50%,0.15) 0, transparent 50%), 
+      radial-gradient(at 50% 0%, hsla(225,100%,50%,0.1) 0, transparent 50%), 
+      radial-gradient(at 100% 0%, hsla(273,100%,50%,0.15) 0, transparent 50%);
   }
+
+  .input-premium {
+    @apply bg-slate-900/50 border border-slate-700/50 text-white rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-cyan-500/50 focus:border-cyan-500/50 transition-all duration-300 backdrop-blur-md;
+  }
+
+  .badge-premium {
+    @apply px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider border;
+  }
+
+  .badge-cyan {
+    @apply badge-premium bg-cyan-500/10 text-cyan-400 border-cyan-500/30 shadow-[0_0_10px_rgba(34,211,238,0.2)];
+  }
+
+  .badge-purple {
+    @apply badge-premium bg-purple-500/10 text-purple-400 border-purple-500/30;
+  }
+
+  .badge-red {
+    @apply badge-premium bg-red-500/10 text-red-400 border-red-500/30;
+  }
+}
+
+/* Custom Hide Scrollbar */
+.hide-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.hide-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
 }
